@@ -6,6 +6,7 @@ import EvidenceUploadZone from './EvidenceUploadZone';
 import EvidenceCard, { EvidenceItem } from './EvidenceCard';
 import EvidenceDetailModal from './EvidenceDetailModal';
 import EvidenceTimeline from './EvidenceTimeline';
+import PageHeader from '@/components/ui/PageHeader';
 
 const initialEvidence: EvidenceItem[] = [
   {
@@ -71,21 +72,18 @@ export default function EvidenceLockerScreen() {
 
   return (
     <div className="space-y-6 pb-24 lg:pb-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Evidence Locker</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Store, audit, and mathematically sign evidence for legal submissions
-          </p>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 glass-card rounded-lg border border-primary/20">
-          <Database size={14} className="text-primary" />
-          <span className="text-xs font-semibold text-foreground">
-            {evidenceList.length} secure hashes registered
-          </span>
-        </div>
-      </div>
+      <PageHeader
+        title="Evidence Locker"
+        subtitle="Store, audit, and mathematically sign evidence for legal submissions"
+        actions={
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-lg border border-blue-200">
+            <Database size={14} className="text-blue-600" />
+            <span className="text-xs font-semibold text-gray-800">
+              {evidenceList.length} secure hashes registered
+            </span>
+          </div>
+        }
+      />
 
       {/* Main Grid: Upload zone & filters + timeline */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -95,17 +93,17 @@ export default function EvidenceLockerScreen() {
           <EvidenceUploadZone onUploadSuccess={handleUploadSuccess} />
 
           {/* Search + Filter toolbar */}
-          <div className="glass-card border border-border p-4 rounded-xl space-y-3">
+          <div className="bg-white border border-gray-200 p-4 rounded-xl shadow-xs space-y-3">
             <div className="flex flex-col sm:flex-row gap-3">
               {/* Search Bar */}
               <div className="relative flex-1">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Search file name or OCR text content..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-10 pl-10 pr-4 rounded-lg bg-black border border-border/80 text-xs focus:outline-none focus:border-primary/50 transition-all placeholder:text-zinc-600"
+                  className="w-full h-10 pl-10 pr-4 rounded-lg bg-gray-50 border border-gray-200 text-xs focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-gray-400 text-gray-900 font-medium"
                 />
               </div>
 
@@ -117,8 +115,8 @@ export default function EvidenceLockerScreen() {
                     onClick={() => setActiveFilter(filter)}
                     className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all whitespace-nowrap border ${
                       activeFilter === filter
-                        ? 'bg-primary/10 text-primary border-primary/20 neon-glow-primary'
-                        : 'bg-zinc-900 border-border/50 text-muted-foreground hover:text-foreground'
+                        ? 'bg-blue-50 text-blue-600 border-blue-200'
+                        : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                     }`}
                   >
                     {filter}
@@ -130,10 +128,10 @@ export default function EvidenceLockerScreen() {
 
           {/* Grid List */}
           {filteredEvidence.length === 0 ? (
-            <div className="glass-card border border-border p-12 text-center rounded-xl flex flex-col items-center justify-center">
-              <Database size={28} className="text-muted-foreground mb-3" />
-              <h3 className="text-sm font-semibold text-foreground mb-1">Locker is Empty</h3>
-              <p className="text-xs text-muted-foreground max-w-xs">
+            <div className="bg-white border border-gray-200 p-12 text-center rounded-xl flex flex-col items-center justify-center shadow-xs">
+              <Database size={28} className="text-gray-400 mb-3" />
+              <h3 className="text-sm font-semibold text-gray-800 mb-1">Locker is Empty</h3>
+              <p className="text-xs text-gray-500 max-w-xs font-medium leading-normal">
                 No matching evidence items detected. Securely drag & drop media into the vault to generate SHA-256 footprints.
               </p>
             </div>

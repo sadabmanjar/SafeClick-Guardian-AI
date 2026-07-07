@@ -27,36 +27,40 @@ const threatFeeds = [
 
 export default function ThreatFeedsList() {
   return (
-    <div className="glass-card rounded-xl border border-border p-5 flex flex-col justify-between h-full">
+    <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col justify-between h-full shadow-sm">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <TrendingUp size={16} className="text-primary animate-pulse" />
+            <TrendingUp size={16} className="text-blue-600" />
             <div>
-              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Threat Index</h3>
-              <p className="text-sm text-foreground font-semibold mt-0.5">Active Community Threat Feed</p>
+              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Threat Index</h3>
+              <p className="text-sm text-gray-900 font-semibold mt-0.5">Active Community Threat Feed</p>
             </div>
           </div>
-          <Link href="/heatmap" className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1">
+          <Link href="/heatmap" className="text-[10px] font-bold text-blue-600 hover:underline flex items-center gap-1">
             Open Heatmap <ArrowUpRight size={10} />
           </Link>
         </div>
 
         <div className="space-y-2.5">
           {threatFeeds.map((feed, idx) => (
-            <div key={`feed-${idx}`} className="p-3 bg-zinc-950/40 border border-border/50 rounded-lg flex items-start gap-3">
-              <div className="p-1 rounded bg-danger/10 border border-danger/20 text-danger mt-0.5 flex-shrink-0">
-                <AlertCircle size={14} className={feed.trend === 'critical' ? 'animate-bounce' : ''} />
+            <div key={`feed-${idx}`} className="p-3 bg-gray-50/50 border border-gray-150 rounded-lg flex items-start gap-3">
+              <div className={`p-1.5 rounded-lg flex-shrink-0 mt-0.5 ${
+                feed.trend === 'critical' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-amber-50 text-amber-600 border border-amber-100'
+              }`}>
+                <AlertCircle size={14} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-[9px] font-bold uppercase text-danger bg-danger/15 px-1 rounded font-mono border border-danger/20">
-                    {feed.trend} threat
+                  <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded font-mono border ${
+                    feed.trend === 'critical' ? 'text-red-600 bg-red-50 border-red-100' : 'text-amber-600 bg-amber-50 border-amber-100'
+                  }`}>
+                    {feed.trend}
                   </span>
-                  <span className="text-[10px] text-muted-foreground font-mono ml-auto">{feed.category}</span>
+                  <span className="text-[10px] text-gray-400 font-mono ml-auto">{feed.category}</span>
                 </div>
-                <h4 className="text-xs font-bold text-foreground mt-1.5 truncate">{feed.title}</h4>
-                <p className="text-[10px] text-muted-foreground mt-0.5">{feed.incidents}</p>
+                <h4 className="text-xs font-semibold text-gray-900 mt-1.5 truncate">{feed.title}</h4>
+                <p className="text-[10px] text-gray-500 mt-0.5">{feed.incidents}</p>
               </div>
             </div>
           ))}

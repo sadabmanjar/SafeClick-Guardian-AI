@@ -8,11 +8,11 @@ interface RiskGaugeChartProps {
 }
 
 const colorMap = {
-  safe: 'var(--success)',
-  low: 'var(--success)',
-  medium: 'var(--warning)',
-  high: 'var(--danger)',
-  critical: 'var(--danger)',
+  safe: '#16A34A',
+  low: '#16A34A',
+  medium: '#F59E0B',
+  high: '#DC2626',
+  critical: '#DC2626',
 };
 
 const labelMap = {
@@ -29,7 +29,7 @@ export default function RiskGaugeChart({ score, riskLevel }: RiskGaugeChartProps
 
   return (
     <div className="flex flex-col items-center">
-      <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Risk Score</p>
+      <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2">Risk Score</p>
       <div className="relative w-36 h-36">
         <ResponsiveContainer width="100%" height="100%">
           <RadialBarChart
@@ -37,22 +37,22 @@ export default function RiskGaugeChart({ score, riskLevel }: RiskGaugeChartProps
             cy="50%"
             innerRadius="65%"
             outerRadius="90%"
-            barSize={10}
+            barSize={8}
             data={data}
             startAngle={90}
             endAngle={-270}
           >
             <RadialBar
-              background={{ fill: 'var(--muted)' }}
+              background={{ fill: '#F3F4F6' }}
               dataKey="value"
-              cornerRadius={5}
+              cornerRadius={4}
               max={100}
             />
           </RadialBarChart>
         </ResponsiveContainer>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span
-            className="text-3xl font-bold font-mono-data"
+            className="text-3xl font-bold font-mono text-gray-900"
             style={{ color }}
           >
             {score}
@@ -63,14 +63,14 @@ export default function RiskGaugeChart({ score, riskLevel }: RiskGaugeChartProps
         </div>
       </div>
       <div className="flex items-center gap-2 mt-1">
-        <span className="text-[11px] text-muted-foreground">0</span>
-        <div className="flex-1 h-1 rounded-full overflow-hidden bg-muted w-24">
+        <span className="text-[11px] text-gray-400 font-semibold">0</span>
+        <div className="flex-1 h-1 rounded-full overflow-hidden bg-gray-100 w-24">
           <div
             className="h-full rounded-full transition-all duration-1000"
             style={{ width: `${score}%`, background: color }}
           />
         </div>
-        <span className="text-[11px] text-muted-foreground">100</span>
+        <span className="text-[11px] text-gray-400 font-semibold">100</span>
       </div>
     </div>
   );

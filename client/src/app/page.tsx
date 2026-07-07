@@ -18,7 +18,6 @@ import {
   HelpCircle,
   Check,
   Brain,
-  Sparkles,
   BarChart3,
   Server,
   Fingerprint
@@ -54,74 +53,68 @@ export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
-  // Animation variants
+  // Animation variants (consistent duration below 300ms)
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.15 }
+      transition: { staggerChildren: 0.08 }
     }
   };
 
   const itemVariants = {
-    hidden: { y: 30, opacity: 0 },
+    hidden: { y: 15, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
-      transition: { type: 'spring' as const, stiffness: 100, damping: 15 }
+      transition: { duration: 0.25, ease: 'easeOut' as const }
     }
   };
 
   return (
-    <div className="min-h-screen bg-black text-foreground selection:bg-cyan-500 selection:text-black overflow-x-hidden">
-      {/* Background Decorative Neon Glows */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute top-[800px] right-1/4 w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-[1000px] left-1/3 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[130px] pointer-events-none" />
-
-      {/* Cyber Grid Overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#080f25_1px,transparent_1px),linear-gradient(to_bottom,#080f25_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-35 pointer-events-none" />
-
+    <div className="min-h-screen bg-[#FAFAF8] text-gray-900 selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden font-sans">
+      
       {/* 1. NAVBAR */}
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-black/70 backdrop-blur-xl">
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
-            <AppLogo size={36} />
+            <AppLogo size={28} />
             <div className="flex flex-col">
-              <span className="text-base font-bold tracking-tight text-white flex items-center gap-1.5">
-                SafeClick <span className="text-[10px] bg-primary/20 border border-primary/30 text-primary px-1.5 py-0.5 rounded font-semibold uppercase tracking-wider">AI</span>
+              <span className="text-sm font-bold tracking-tight text-gray-900 flex items-center gap-1.5">
+                SafeClick <span className="text-[9px] bg-blue-50 border border-blue-100 text-blue-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">AI</span>
               </span>
-              <span className="text-[11px] text-muted-foreground font-mono">GUARDIAN SYSTEM</span>
+              <span className="text-[9px] text-gray-400 font-mono tracking-wider font-semibold">GUARDIAN NODE</span>
             </div>
           </div>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-            <a href="#features" className="hover:text-cyan-400 transition-colors">Features</a>
-            <a href="#process" className="hover:text-cyan-400 transition-colors">How It Works</a>
-            <a href="#stats" className="hover:text-cyan-400 transition-colors">Threat Feed</a>
-            <a href="#ai-modules" className="hover:text-cyan-400 transition-colors">AI Core</a>
-            <a href="#faq" className="hover:text-cyan-400 transition-colors">FAQ</a>
+          <nav className="hidden md:flex items-center gap-8 text-xs font-bold text-gray-500 uppercase tracking-wide">
+            <a href="#features" className="hover:text-blue-600 transition-colors">Pillars</a>
+            <a href="#process" className="hover:text-blue-600 transition-colors">Protocol</a>
+            <a href="#stats" className="hover:text-blue-600 transition-colors">Threat Index</a>
+            <a href="#ai-modules" className="hover:text-blue-600 transition-colors">AI Engine</a>
+            <a href="#faq" className="hover:text-blue-600 transition-colors">FAQ</a>
           </nav>
 
           <div className="hidden md:flex items-center gap-4">
-            <Link href="/login" className="text-sm font-medium hover:text-white transition-colors">
+            <Link href="/login" className="text-xs font-bold text-gray-500 hover:text-gray-900 transition-colors uppercase tracking-wide">
               Sign In
             </Link>
             <Link
               href="/analyze"
-              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_15px_rgba(0,102,255,0.4)] transition-all"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 shadow-sm transition-all"
             >
-              Launch Platform <ArrowRight size={14} />
+              Launch Console <ArrowRight size={12} />
             </Link>
           </div>
 
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+            className="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+            aria-label="Toggle Menu"
           >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
 
@@ -132,59 +125,60 @@ export default function LandingPage() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden border-b border-border/50 bg-black/95 backdrop-blur-2xl"
+              transition={{ duration: 0.2 }}
+              className="md:hidden border-b border-gray-200 bg-white"
             >
-              <div className="flex flex-col gap-4 px-6 py-8">
+              <div className="flex flex-col gap-4 px-6 py-6 text-sm font-semibold">
                 <a
                   href="#features"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-base font-semibold text-muted-foreground hover:text-white"
+                  className="text-gray-500 hover:text-gray-900"
                 >
-                  Features
+                  Pillars
                 </a>
                 <a
                   href="#process"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-base font-semibold text-muted-foreground hover:text-white"
+                  className="text-gray-500 hover:text-gray-900"
                 >
-                  How It Works
+                  Protocol
                 </a>
                 <a
                   href="#stats"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-base font-semibold text-muted-foreground hover:text-white"
+                  className="text-gray-500 hover:text-gray-900"
                 >
-                  Threat Feed
+                  Threat Index
                 </a>
                 <a
                   href="#ai-modules"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-base font-semibold text-muted-foreground hover:text-white"
+                  className="text-gray-500 hover:text-gray-900"
                 >
-                  AI Core
+                  AI Engine
                 </a>
                 <a
                   href="#faq"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-base font-semibold text-muted-foreground hover:text-white"
+                  className="text-gray-500 hover:text-gray-900"
                 >
                   FAQ
                 </a>
-                <hr className="border-border/40" />
+                <hr className="border-gray-100" />
                 <div className="flex flex-col gap-3">
                   <Link
                     href="/login"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex h-11 items-center justify-center rounded-lg border border-border text-sm font-semibold hover:bg-muted"
+                    className="flex h-10 items-center justify-center rounded-lg border border-gray-200 text-xs font-bold hover:bg-gray-50 text-gray-700"
                   >
                     Sign In
                   </Link>
                   <Link
                     href="/analyze"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex h-11 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-semibold shadow-[0_0_15px_rgba(0,102,255,0.4)]"
+                    className="flex h-10 items-center justify-center rounded-lg bg-blue-600 text-white text-xs font-bold shadow-sm"
                   >
-                    Launch Platform
+                    Launch Console
                   </Link>
                 </div>
               </div>
@@ -194,17 +188,17 @@ export default function LandingPage() {
       </header>
 
       {/* 2. HERO SECTION */}
-      <section className="relative pt-16 pb-20 md:pt-24 md:pb-32 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative pt-20 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="text-center space-y-6 max-w-4xl mx-auto"
+          className="text-center space-y-6 max-w-3xl mx-auto"
         >
-          {/* Badge */}
+          {/* Hackathon Entry Badge */}
           <motion.div variants={itemVariants} className="inline-flex justify-center">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border border-cyan-500/30 bg-cyan-500/10 text-cyan-400">
-              <ShieldCheck size={13} className="animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border border-blue-100 bg-blue-50 text-blue-600 uppercase tracking-wider">
+              <ShieldCheck size={12} className="animate-pulse" />
               National Cyber Security Hackathon Entry
             </span>
           </motion.div>
@@ -212,115 +206,114 @@ export default function LandingPage() {
           {/* Headline */}
           <motion.h1
             variants={itemVariants}
-            className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight bg-gradient-to-b from-white via-zinc-200 to-zinc-600 bg-clip-text text-transparent leading-[1.1]"
+            className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900 leading-[1.15]"
           >
-            Defend Your Digital Space With <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">AI Threat Intelligence</span>
+            Intercept Financial Threat Vectors with <span className="text-blue-600">AI Safety Intelligence</span>
           </motion.h1>
 
           {/* Subtitle */}
           <motion.p
             variants={itemVariants}
-            className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
+            className="text-sm sm:text-base text-gray-500 max-w-xl mx-auto leading-relaxed font-medium"
           >
             SafeClick Guardian AI intercepts, scans, and neutralizes phishing attempts, fraudulent messages, and online financial threats in real time.
           </motion.p>
 
           {/* Buttons */}
-          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-3">
             <Link
               href="/analyze"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl text-base font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-[1.02] shadow-[0_0_20px_rgba(0,102,255,0.5)] transition-all duration-200"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 shadow-sm transition-all"
             >
-              Analyze Suspicious Scan <ArrowRight size={16} />
+              Analyze Suspicious Scan <ArrowRight size={14} />
             </Link>
             <a
               href="#features"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl text-base font-semibold border border-border bg-white/5 hover:bg-white/10 transition-all duration-200"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-xs font-bold border border-gray-250 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              Explore Shield Pillars
+              Explore Pillars
             </a>
           </motion.div>
 
-          {/* Security Features Badges */}
+          {/* Core specs badges */}
           <motion.div
             variants={itemVariants}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto pt-12 text-sm font-mono text-muted-foreground"
+            className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto pt-10 text-[10px] font-bold tracking-wider text-gray-400 uppercase font-mono"
           >
-            <div className="flex items-center justify-center gap-2 px-3 py-2 glass-card rounded-lg border border-border/40">
-              <Lock size={14} className="text-cyan-400" />
-              <span>Zero-Knowledge Policy</span>
+            <div className="flex items-center justify-center gap-1.5 py-2.5 bg-white rounded-lg border border-gray-200 shadow-xs">
+              <Lock size={12} className="text-blue-600" />
+              <span>Zero-Knowledge</span>
             </div>
-            <div className="flex items-center justify-center gap-2 px-3 py-2 glass-card rounded-lg border border-border/40">
-              <Zap size={14} className="text-cyan-400" />
-              <span>&lt;200ms Processing</span>
+            <div className="flex items-center justify-center gap-1.5 py-2.5 bg-white rounded-lg border border-gray-200 shadow-xs">
+              <Zap size={12} className="text-blue-600" />
+              <span>&lt;200ms API Speed</span>
             </div>
-            <div className="flex items-center justify-center gap-2 px-3 py-2 glass-card rounded-lg border border-border/40">
-              <Brain size={14} className="text-cyan-400" />
-              <span>Gemini LLM Engine</span>
+            <div className="flex items-center justify-center gap-1.5 py-2.5 bg-white rounded-lg border border-gray-200 shadow-xs">
+              <Brain size={12} className="text-blue-600" />
+              <span>Gemini Engine</span>
             </div>
-            <div className="flex items-center justify-center gap-2 px-3 py-2 glass-card rounded-lg border border-border/40">
-              <Fingerprint size={14} className="text-cyan-400" />
+            <div className="flex items-center justify-center gap-1.5 py-2.5 bg-white rounded-lg border border-gray-200 shadow-xs">
+              <Fingerprint size={12} className="text-blue-600" />
               <span>Local OCR Extraction</span>
             </div>
           </motion.div>
         </motion.div>
 
-        {/* Floating Mockup Preview */}
+        {/* Dashboard visual mockup */}
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 25 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.8 }}
-          className="mt-20 relative rounded-2xl border border-border/40 bg-zinc-950/80 p-3 shadow-[0_0_50px_rgba(0,102,255,0.15)] max-w-5xl mx-auto group overflow-hidden"
+          transition={{ delay: 0.3, duration: 0.3 }}
+          className="mt-14 relative rounded-xl border border-gray-200 bg-white p-3 shadow-md max-w-4xl mx-auto"
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-          <div className="flex items-center gap-1.5 px-4 py-2 border-b border-border/40 bg-zinc-900/50 rounded-t-xl text-xs font-mono text-muted-foreground">
-            <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-            <div className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
-            <span className="ml-2">safeclick-guardian-terminal-v1.0.exe</span>
-            <div className="ml-auto w-2 h-2 rounded-full bg-success animate-pulse" />
-            <span className="text-success font-semibold">AI ACTIVE</span>
+          <div className="flex items-center gap-1.5 px-3 py-2 border-b border-gray-150 bg-gray-50/50 rounded-t-lg text-[10px] font-bold text-gray-400 font-mono">
+            <div className="w-2 h-2 rounded-full bg-red-400" />
+            <div className="w-2 h-2 rounded-full bg-yellow-400" />
+            <div className="w-2 h-2 rounded-full bg-green-400" />
+            <span className="ml-1.5">SAFECLICK-CONSOLE-MP-V1.0</span>
+            <div className="ml-auto flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-green-600 font-bold uppercase tracking-wider text-[8px]">SECURE CONNECTION</span>
+            </div>
           </div>
-          <div className="relative aspect-[16/9] w-full rounded-b-xl bg-black overflow-hidden flex items-center justify-center p-6 sm:p-12">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,102,255,0.08)_0%,transparent_70%)] pointer-events-none" />
-            
-            {/* Mock Dashboard Layout */}
-            <div className="w-full h-full border border-primary/20 rounded-xl bg-zinc-950/50 flex flex-col overflow-hidden font-sans">
-              <div className="h-12 border-b border-border/50 bg-black/60 px-4 flex items-center justify-between">
-                <span className="text-xs font-semibold text-primary">SCAM THREAT ANALYZER</span>
+          <div className="relative aspect-[16/9] w-full rounded-b-lg bg-[#FAFAF8] overflow-hidden flex items-center justify-center p-6 border border-t-0 border-gray-100">
+            {/* Minimal mockup container */}
+            <div className="w-full max-w-2xl border border-gray-200 rounded-xl bg-white flex flex-col overflow-hidden shadow-xs text-left">
+              <div className="h-10 border-b border-gray-150 bg-gray-50/50 px-4 flex items-center justify-between">
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Scam Risk Assessment</span>
                 <StatusBadge variant="high" label="High Threat Detected" dot />
               </div>
-              <div className="flex-1 grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-border/50 text-left">
-                <div className="p-4 space-y-3">
-                  <h4 className="text-xs font-bold text-muted-foreground uppercase">Threat Source</h4>
-                  <div className="p-3 bg-red-500/5 border border-red-500/20 rounded-lg text-xs font-mono">
-                    <p className="text-red-400 font-bold">SMS / WhatsApp Message</p>
-                    <p className="text-muted-foreground mt-1 truncate">"Your bank account is locked. Reactivate at secure-link.net..."</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-150 text-left">
+                <div className="p-4 space-y-2">
+                  <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Threat Text</h4>
+                  <div className="p-2.5 bg-red-50/50 border border-red-100 rounded-lg text-[10px] font-semibold text-red-700">
+                    <p className="font-bold">SMS Broadcast</p>
+                    <p className="text-gray-500 mt-1 truncate">"Your SBI account is disabled. Log in to claim..."</p>
                   </div>
                 </div>
-                <div className="p-4 space-y-3">
-                  <h4 className="text-xs font-bold text-muted-foreground uppercase">AI Evaluation</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-muted-foreground">Confidence Score:</span>
-                      <span className="text-danger font-bold">94% Scam</span>
+                <div className="p-4 space-y-2">
+                  <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">AI Evaluation</h4>
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-[10px] font-bold">
+                      <span className="text-gray-500">Confidence:</span>
+                      <span className="text-red-600">94% Phishing</span>
                     </div>
-                    <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <div className="h-full bg-danger w-[94%]" />
+                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-red-600 w-[94%]" />
                     </div>
-                    <p className="text-[10px] text-muted-foreground">High threat profile matching standard banking spoofing attacks.</p>
+                    <p className="text-[9px] text-gray-400 leading-snug font-medium">Domain spoofing indicators detected on suspicious site.</p>
                   </div>
                 </div>
                 <div className="p-4 flex flex-col justify-between">
                   <div>
-                    <h4 className="text-xs font-bold text-muted-foreground uppercase mb-2">Automated Incident Action</h4>
-                    <span className="inline-flex text-[10px] bg-primary/20 text-primary border border-primary/30 px-2 py-0.5 rounded font-mono mb-2">
-                      POLICE DRAFT READY
+                    <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Actions Available</h4>
+                    <span className="inline-flex text-[8px] bg-blue-50 text-blue-600 border border-blue-100 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider mt-1">
+                      Report Package Ready
                     </span>
-                    <p className="text-xs text-muted-foreground">Legal complaint draft generated containing metadata and screenshots.</p>
+                    <p className="text-[9px] text-gray-400 mt-1 leading-snug font-medium">Police-compliant complaint report generated locally with evidence packet.</p>
                   </div>
-                  <button className="w-full py-2 bg-primary/10 border border-primary/30 hover:bg-primary/20 text-primary text-xs rounded-lg transition-colors font-semibold">
-                    Download Complaint Packet
+                  <button className="w-full py-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-100 text-blue-600 text-[10px] rounded-lg transition-colors font-bold mt-2">
+                    Download Complaint Report
                   </button>
                 </div>
               </div>
@@ -330,150 +323,160 @@ export default function LandingPage() {
       </section>
 
       {/* 3. CORE SHIELD PILLARS (FEATURES) */}
-      <section id="features" className="py-20 border-t border-border/30 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center space-y-3 mb-16">
-          <h2 className="text-sm font-semibold font-mono tracking-widest text-primary uppercase">DEFENSIVE SUITE</h2>
-          <h3 className="text-3xl sm:text-5xl font-extrabold tracking-tight">Five Pillars of Cyber Protection</h3>
-          <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
+      <section id="features" className="py-20 border-t border-gray-200 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="text-center space-y-3 mb-14">
+          <h2 className="text-[10px] font-bold tracking-widest text-blue-600 uppercase font-mono">Defensive Architecture</h2>
+          <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">Five Pillars of Citizen Protection</h3>
+          <p className="text-xs sm:text-sm text-gray-500 max-w-xl mx-auto font-medium">
             SafeClick delivers integrated, multi-vector shielding designed to defend and assist victims of cyber fraud.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Feature 1 */}
-          <div className="glass-card border border-border/40 p-6 rounded-2xl hover:border-primary/40 transition-all duration-300 group flex flex-col justify-between">
+          {/* Pillar 1 */}
+          <div className="bg-white border border-gray-200 p-5 rounded-xl shadow-xs hover:shadow-md hover:border-blue-300 transition-all group flex flex-col justify-between">
             <div className="space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all">
-                <Brain size={20} />
+              <div className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
+                <Brain size={18} />
               </div>
-              <h4 className="text-lg font-bold text-foreground">AI Scam Scanner</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Paste suspicious URLs, SMS text, or upload screenshots of chat conversations. Our OCR extracts details and Gemini evaluates threats.
-              </p>
+              <div>
+                <h4 className="text-sm font-bold text-gray-900">AI Scam Scanner</h4>
+                <p className="text-xs text-gray-500 font-medium leading-relaxed mt-1">
+                  Paste suspicious URLs, SMS text, or upload screenshots of chat conversations. Our OCR extracts details and Gemini evaluates threats.
+                </p>
+              </div>
             </div>
-            <Link href="/analyze" className="inline-flex items-center gap-1.5 text-xs text-primary font-semibold hover:underline mt-6">
+            <Link href="/analyze" className="inline-flex items-center gap-1.5 text-xs text-blue-600 font-bold hover:underline mt-6">
               Launch Scanner <ArrowRight size={12} />
             </Link>
           </div>
 
-          {/* Feature 2 */}
-          <div className="glass-card border border-border/40 p-6 rounded-2xl hover:border-primary/40 transition-all duration-300 group flex flex-col justify-between">
+          {/* Pillar 2 */}
+          <div className="bg-white border border-gray-200 p-5 rounded-xl shadow-xs hover:shadow-md hover:border-red-300 transition-all group flex flex-col justify-between">
             <div className="space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 group-hover:bg-cyan-500 group-hover:text-black transition-all">
-                <AlertTriangle size={20} />
+              <div className="w-10 h-10 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center text-red-600">
+                <AlertTriangle size={18} />
               </div>
-              <h4 className="text-lg font-bold text-foreground">Emergency SOS Mode</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Under attack? Trigger SOS mode to lock down financial apps, notify pre-configured trusted contacts, and execute defensive checklist steps.
-              </p>
+              <div>
+                <h4 className="text-sm font-bold text-gray-900">Emergency SOS Mode</h4>
+                <p className="text-xs text-gray-500 font-medium leading-relaxed mt-1">
+                  Under attack? Trigger SOS mode to lock down financial apps, notify pre-configured trusted contacts, and execute defensive checklist steps.
+                </p>
+              </div>
             </div>
-            <Link href="/emergency-mode" className="inline-flex items-center gap-1.5 text-xs text-primary font-semibold hover:underline mt-6">
+            <Link href="/emergency" className="inline-flex items-center gap-1.5 text-xs text-red-600 font-bold hover:underline mt-6">
               Lock Down System <ArrowRight size={12} />
             </Link>
           </div>
 
-          {/* Feature 3 */}
-          <div className="glass-card border border-border/40 p-6 rounded-2xl hover:border-primary/40 transition-all duration-300 group flex flex-col justify-between">
+          {/* Pillar 3 */}
+          <div className="bg-white border border-gray-200 p-5 rounded-xl shadow-xs hover:shadow-md hover:border-green-300 transition-all group flex flex-col justify-between">
             <div className="space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all">
-                <FileText size={20} />
+              <div className="w-10 h-10 rounded-lg bg-green-50 border border-green-100 flex items-center justify-center text-green-600">
+                <FileText size={18} />
               </div>
-              <h4 className="text-lg font-bold text-foreground">Complaint Generator</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Auto-generate legal complaint reports formatted exactly for cyber cell portals. Saves time during critical post-incident hours.
-              </p>
+              <div>
+                <h4 className="text-sm font-bold text-gray-900">Complaint Generator</h4>
+                <p className="text-xs text-gray-500 font-medium leading-relaxed mt-1">
+                  Auto-generate legal complaint reports formatted exactly for cyber cell portals. Saves time during critical post-incident hours.
+                </p>
+              </div>
             </div>
-            <Link href="/complaint-generator" className="inline-flex items-center gap-1.5 text-xs text-primary font-semibold hover:underline mt-6">
+            <Link href="/complaint" className="inline-flex items-center gap-1.5 text-xs text-green-600 font-bold hover:underline mt-6">
               Draft Complaint <ArrowRight size={12} />
             </Link>
           </div>
 
-          {/* Feature 4 */}
-          <div className="glass-card border border-border/40 p-6 rounded-2xl hover:border-primary/40 transition-all duration-300 group flex flex-col justify-between">
+          {/* Pillar 4 */}
+          <div className="bg-white border border-gray-200 p-5 rounded-xl shadow-xs hover:shadow-md hover:border-indigo-300 transition-all group flex flex-col justify-between">
             <div className="space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 group-hover:bg-cyan-500 group-hover:text-black transition-all">
-                <MapPin size={20} />
+              <div className="w-10 h-10 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                <MapPin size={18} />
               </div>
-              <h4 className="text-lg font-bold text-foreground">Threat Heatmap</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Visualize active scam hotspots and coordinate reports dynamically. Track phishing clusters in your region and avoid danger zones.
-              </p>
+              <div>
+                <h4 className="text-sm font-bold text-gray-900">Threat Heatmap</h4>
+                <p className="text-xs text-gray-500 font-medium leading-relaxed mt-1">
+                  Visualize active scam hotspots and coordinate reports dynamically. Track phishing clusters in your region and avoid danger zones.
+                </p>
+              </div>
             </div>
-            <Link href="/heatmap" className="inline-flex items-center gap-1.5 text-xs text-primary font-semibold hover:underline mt-6">
+            <Link href="/heatmap" className="inline-flex items-center gap-1.5 text-xs text-indigo-600 font-bold hover:underline mt-6">
               View Threat Map <ArrowRight size={12} />
             </Link>
           </div>
 
-          {/* Feature 5 */}
-          <div className="glass-card border border-border/40 p-6 rounded-2xl hover:border-primary/40 transition-all duration-300 group flex flex-col justify-between">
+          {/* Pillar 5 */}
+          <div className="bg-white border border-gray-200 p-5 rounded-xl shadow-xs hover:shadow-md hover:border-blue-300 transition-all group flex flex-col justify-between">
             <div className="space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all">
-                <GraduationCap size={20} />
+              <div className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
+                <GraduationCap size={18} />
               </div>
-              <h4 className="text-lg font-bold text-foreground">Cyber Academy</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Take modules on identifying UPI traps, bank phishing, social media spoofing, and secure credentials management.
-              </p>
+              <div>
+                <h4 className="text-sm font-bold text-gray-900">Cyber Academy</h4>
+                <p className="text-xs text-gray-500 font-medium leading-relaxed mt-1">
+                  Take modules on identifying UPI traps, bank phishing, social media spoofing, and secure credentials management.
+                </p>
+              </div>
             </div>
-            <Link href="/learning" className="inline-flex items-center gap-1.5 text-xs text-primary font-semibold hover:underline mt-6">
+            <Link href="/learning" className="inline-flex items-center gap-1.5 text-xs text-blue-600 font-bold hover:underline mt-6">
               Start Learning <ArrowRight size={12} />
             </Link>
           </div>
 
-          {/* Feature 6 (Placeholder/Info card) */}
-          <div className="border border-dashed border-border/60 p-6 rounded-2xl flex flex-col justify-center items-center text-center space-y-3">
-            <div className="w-10 h-10 rounded-full border border-border/60 flex items-center justify-center text-muted-foreground">
-              <Check size={16} />
+          {/* Pillar 6 */}
+          <div className="border border-dashed border-gray-300 p-5 rounded-xl flex flex-col justify-center items-center text-center space-y-2.5">
+            <div className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400">
+              <Check size={14} />
             </div>
-            <h4 className="text-sm font-semibold text-muted-foreground">More Modules Loading</h4>
-            <p className="text-xs text-muted-foreground max-w-xs leading-normal">
-              Continuous neural model training introduces automated SMS interceptors and voice phishing analyzers soon.
+            <h4 className="text-xs font-bold text-gray-700">Additional Safeguards Active</h4>
+            <p className="text-[11px] text-gray-400 leading-normal max-w-xs font-medium">
+              Autonomous safety crawlers are updating reputation indexes for bank subdomains hourly.
             </p>
           </div>
         </div>
       </section>
 
       {/* 4. HOW IT WORKS */}
-      <section id="process" className="py-20 bg-zinc-950/30 border-t border-b border-border/30">
+      <section id="process" className="py-20 border-t border-b border-gray-200 bg-gray-50/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-3 mb-16">
-            <h2 className="text-sm font-semibold font-mono tracking-widest text-primary uppercase">PIPELINE PROTOCOL</h2>
-            <h3 className="text-3xl sm:text-5xl font-extrabold tracking-tight">How SafeClick Protects</h3>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
+          <div className="text-center space-y-3 mb-14">
+            <h2 className="text-[10px] font-bold tracking-widest text-blue-600 uppercase font-mono">PIPELINE PROTOCOL</h2>
+            <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">How SafeClick Protects</h3>
+            <p className="text-xs sm:text-sm text-gray-500 max-w-xl mx-auto font-medium">
               Our end-to-end threat detection pipelines process messages and secure reports in seconds.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
             {/* Step 1 */}
-            <div className="space-y-4 text-center md:text-left relative">
-              <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center font-mono text-sm text-primary font-bold mb-4 mx-auto md:mx-0">
+            <div className="bg-white border border-gray-250 p-6 rounded-xl shadow-xs space-y-3">
+              <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center font-mono text-xs text-blue-600 font-bold">
                 01
               </div>
-              <h4 className="text-base font-bold text-foreground">Extract Details (OCR)</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <h4 className="text-sm font-bold text-gray-900">Extract Details (OCR)</h4>
+              <p className="text-xs text-gray-500 leading-relaxed font-medium">
                 Upload raw message text, link URLs, or screenshot images. The platform's local OCR pipeline extracts structured texts instantly, keeping images private.
               </p>
             </div>
 
             {/* Step 2 */}
-            <div className="space-y-4 text-center md:text-left relative">
-              <div className="w-10 h-10 rounded-full bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center font-mono text-sm text-cyan-400 font-bold mb-4 mx-auto md:mx-0">
+            <div className="bg-white border border-gray-250 p-6 rounded-xl shadow-xs space-y-3">
+              <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center font-mono text-xs text-blue-600 font-bold">
                 02
               </div>
-              <h4 className="text-base font-bold text-foreground">AI Verification Engine</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <h4 className="text-sm font-bold text-gray-900">AI Verification Engine</h4>
+              <p className="text-xs text-gray-500 leading-relaxed font-medium">
                 The Gemini AI Engine analyzes wording tone, domain reputations, threat signatures, and heuristics to flag risk scores and list deception tactics.
               </p>
             </div>
 
             {/* Step 3 */}
-            <div className="space-y-4 text-center md:text-left relative">
-              <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center font-mono text-sm text-primary font-bold mb-4 mx-auto md:mx-0">
+            <div className="bg-white border border-gray-250 p-6 rounded-xl shadow-xs space-y-3">
+              <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center font-mono text-xs text-blue-600 font-bold">
                 03
               </div>
-              <h4 className="text-base font-bold text-foreground">Incident Containment</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <h4 className="text-sm font-bold text-gray-900">Incident Containment</h4>
+              <p className="text-xs text-gray-500 leading-relaxed font-medium">
                 Instantly view the risk report. Lock down finances in SOS mode, download a pre-packaged legal complaint report, or visualize threats on the community map.
               </p>
             </div>
@@ -482,102 +485,108 @@ export default function LandingPage() {
       </section>
 
       {/* 5. CYBER STATISTICS */}
-      <section id="stats" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="stats" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
-            <span className="text-xs font-semibold font-mono tracking-widest text-primary uppercase">THREAT INDEX</span>
-            <h3 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+            <span className="text-[10px] font-bold tracking-widest text-blue-600 uppercase font-mono">THREAT INDEX</span>
+            <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900 leading-tight">
               The Rapid Rise of Cyber Fraud
             </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-xs sm:text-sm text-gray-500 leading-relaxed font-medium">
               Global online scam networks utilize automated bots and social manipulation to hijack financial accounts. Victim containment speed is crucial to preventing critical losses.
             </p>
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <div className="p-1 rounded bg-danger/10 border border-danger/20 text-danger mt-0.5">
-                  <Check size={14} />
+                <div className="p-1 rounded bg-red-50 border border-red-100 text-red-600 mt-0.5">
+                  <Check size={12} />
                 </div>
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground">90% Rise in Spoofing Attacks</h4>
-                  <p className="text-xs text-muted-foreground">Mobile messaging and WhatsApp spoof accounts mimic legitimate government banks.</p>
+                  <h4 className="text-xs font-bold text-gray-900">90% Rise in Spoofing Attacks</h4>
+                  <p className="text-xs text-gray-500 font-medium">Mobile messaging and WhatsApp spoof accounts mimic legitimate government banks.</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="p-1 rounded bg-danger/10 border border-danger/20 text-danger mt-0.5">
-                  <Check size={14} />
+                <div className="p-1 rounded bg-red-50 border border-red-100 text-red-600 mt-0.5">
+                  <Check size={12} />
                 </div>
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground">Golden Hours Containment</h4>
-                  <p className="text-xs text-muted-foreground">Taking recovery steps inside the first 2 hours yields an 85% higher financial recovery success rate.</p>
+                  <h4 className="text-xs font-bold text-gray-900">Golden Hours Containment</h4>
+                  <p className="text-xs text-gray-500 font-medium">Taking recovery steps inside the first 2 hours yields an 85% higher financial recovery success rate.</p>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-6 glass-card border border-border/40 rounded-2xl text-center space-y-2">
-              <p className="text-3xl sm:text-4xl font-extrabold font-mono text-cyan-400">$10B+</p>
-              <p className="text-xs font-semibold uppercase text-muted-foreground">Lost to scams annually</p>
+            <div className="p-5 bg-[#FAFAF8] border border-gray-200 rounded-xl text-center space-y-1">
+              <p className="text-2xl sm:text-3xl font-extrabold font-mono text-blue-600">$10B+</p>
+              <p className="text-[10px] font-bold uppercase text-gray-400">Lost to scams annually</p>
             </div>
-            <div className="p-6 glass-card border border-border/40 rounded-2xl text-center space-y-2">
-              <p className="text-3xl sm:text-4xl font-extrabold font-mono text-primary">2.4M</p>
-              <p className="text-xs font-semibold uppercase text-muted-foreground">Phishing cases reported</p>
+            <div className="p-5 bg-[#FAFAF8] border border-gray-200 rounded-xl text-center space-y-1">
+              <p className="text-2xl sm:text-3xl font-extrabold font-mono text-gray-900">2.4M</p>
+              <p className="text-[10px] font-bold uppercase text-gray-400">Phishing cases reported</p>
             </div>
-            <div className="p-6 glass-card border border-border/40 rounded-2xl text-center space-y-2">
-              <p className="text-3xl sm:text-4xl font-extrabold font-mono text-primary">&lt;1s</p>
-              <p className="text-xs font-semibold uppercase text-muted-foreground">Emergency Lockdown Speed</p>
+            <div className="p-5 bg-[#FAFAF8] border border-gray-200 rounded-xl text-center space-y-1">
+              <p className="text-2xl sm:text-3xl font-extrabold font-mono text-gray-900">&lt;1s</p>
+              <p className="text-[10px] font-bold uppercase text-gray-400">Lockdown Speed</p>
             </div>
-            <div className="p-6 glass-card border border-border/40 rounded-2xl text-center space-y-2">
-              <p className="text-3xl sm:text-4xl font-extrabold font-mono text-cyan-400">94.7%</p>
-              <p className="text-xs font-semibold uppercase text-muted-foreground">AI detection accuracy</p>
+            <div className="p-5 bg-[#FAFAF8] border border-gray-200 rounded-xl text-center space-y-1">
+              <p className="text-2xl sm:text-3xl font-extrabold font-mono text-blue-600 font-semibold">94.7%</p>
+              <p className="text-[10px] font-bold uppercase text-gray-400">Detection accuracy</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* 6. AI CORE MODULES */}
-      <section id="ai-modules" className="py-20 bg-zinc-950/20 border-t border-border/30">
+      <section id="ai-modules" className="py-20 border-t border-gray-200 bg-gray-50/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-3 mb-16">
-            <h2 className="text-sm font-semibold font-mono tracking-widest text-primary uppercase">INTELLIGENCE STACK</h2>
-            <h3 className="text-3xl sm:text-5xl font-extrabold tracking-tight">Our AI Engine Architecture</h3>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
+          <div className="text-center space-y-3 mb-14">
+            <h2 className="text-[10px] font-bold tracking-widest text-blue-600 uppercase font-mono">INTELLIGENCE STACK</h2>
+            <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">Our AI Engine Architecture</h3>
+            <p className="text-xs sm:text-sm text-gray-500 max-w-xl mx-auto font-medium">
               Our system runs a combination of local OCR tools, heuristic scoring, and Gemini NLP processors.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Module 1 */}
-            <div className="p-6 glass-card border border-border/40 rounded-2xl space-y-4">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+            <div className="p-5 bg-white border border-gray-200 rounded-xl space-y-4 shadow-xs">
+              <div className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
                 <Brain size={18} />
               </div>
-              <h4 className="text-base font-bold text-foreground">Gemini Prompt Heuristics</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Utilizes advanced prompt models to evaluate text urgency, fake authority figures, spoof banking indicators, and psychological manipulation vectors.
-              </p>
+              <div>
+                <h4 className="text-sm font-bold text-gray-900">Gemini Prompt Heuristics</h4>
+                <p className="text-xs text-gray-500 leading-relaxed font-medium mt-1">
+                  Utilizes advanced prompt models to evaluate text urgency, fake authority figures, spoof banking indicators, and psychological manipulation vectors.
+                </p>
+              </div>
             </div>
 
             {/* Module 2 */}
-            <div className="p-6 glass-card border border-border/40 rounded-2xl space-y-4">
-              <div className="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+            <div className="p-5 bg-white border border-gray-200 rounded-xl space-y-4 shadow-xs">
+              <div className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
                 <Server size={18} />
               </div>
-              <h4 className="text-base font-bold text-foreground">Tesseract OCR Pipeline</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Client-side OCR processing extracts phone numbers, URLs, transaction IDs, and names directly from WhatsApp/SMS screenshots without server file storage.
-              </p>
+              <div>
+                <h4 className="text-sm font-bold text-gray-900">Tesseract OCR Pipeline</h4>
+                <p className="text-xs text-gray-500 leading-relaxed font-medium mt-1">
+                  Client-side OCR processing extracts phone numbers, URLs, transaction IDs, and names directly from WhatsApp/SMS screenshots without server file storage.
+                </p>
+              </div>
             </div>
 
             {/* Module 3 */}
-            <div className="p-6 glass-card border border-border/40 rounded-2xl space-y-4">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+            <div className="p-5 bg-white border border-gray-200 rounded-xl space-y-4 shadow-xs">
+              <div className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
                 <BarChart3 size={18} />
               </div>
-              <h4 className="text-base font-bold text-foreground">Reputation API Scoring</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Performs domain checks, DNS routing records lookup, and spam registry validations to verify link integrity and isolate zero-day phishing sites.
-              </p>
+              <div>
+                <h4 className="text-sm font-bold text-gray-900">Reputation API Scoring</h4>
+                <p className="text-xs text-gray-500 leading-relaxed font-medium mt-1">
+                  Performs domain checks, DNS routing lookup, and spam registry validations to verify link integrity and isolate zero-day phishing sites.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -585,25 +594,25 @@ export default function LandingPage() {
 
       {/* 7. FAQ SECTION */}
       <section id="faq" className="py-20 max-w-4xl mx-auto px-4 sm:px-6">
-        <div className="text-center space-y-3 mb-16">
-          <h2 className="text-sm font-semibold font-mono tracking-widest text-primary uppercase">INQUIRIES</h2>
-          <h3 className="text-3xl sm:text-5xl font-extrabold tracking-tight">Frequently Asked Questions</h3>
+        <div className="text-center space-y-3 mb-14">
+          <h2 className="text-[10px] font-bold tracking-widest text-blue-600 uppercase font-mono">INQUIRIES</h2>
+          <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">Frequently Asked Questions</h3>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {faqs.map((faq, index) => {
             const isOpen = activeFaq === index;
             return (
               <div
                 key={`faq-${index}`}
-                className="border border-border/40 bg-zinc-950/60 rounded-xl overflow-hidden transition-colors"
+                className="border border-gray-200 bg-white rounded-lg overflow-hidden transition-colors shadow-xs"
               >
                 <button
                   onClick={() => setActiveFaq(isOpen ? null : index)}
-                  className="w-full flex items-center justify-between p-5 text-left text-sm font-bold text-foreground hover:bg-white/5 transition-colors"
+                  className="w-full flex items-center justify-between p-4 text-left text-xs font-bold text-gray-800 hover:bg-gray-50 transition-colors"
                 >
                   <span>{faq.q}</span>
-                  <HelpCircle size={16} className={`text-muted-foreground transition-transform ${isOpen ? 'rotate-180 text-primary' : ''}`} />
+                  <HelpCircle size={14} className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180 text-blue-600' : ''}`} />
                 </button>
                 <AnimatePresence initial={false}>
                   {isOpen && (
@@ -613,7 +622,7 @@ export default function LandingPage() {
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <div className="px-5 pb-5 pt-1 text-xs text-muted-foreground leading-relaxed border-t border-border/20">
+                      <div className="px-4 pb-4 pt-1.5 text-xs text-gray-500 leading-relaxed font-medium border-t border-gray-100">
                         {faq.a}
                       </div>
                     </motion.div>
@@ -626,46 +635,45 @@ export default function LandingPage() {
       </section>
 
       {/* 8. CALL TO ACTION (CTA) */}
-      <section className="py-16 sm:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-border/30">
-        <div className="relative rounded-3xl border border-primary/30 bg-[radial-gradient(ellipse_at_center,rgba(0,102,255,0.15)_0%,transparent_80%)] overflow-hidden px-8 py-16 sm:px-16 text-center space-y-6">
-          <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-cyan-500/10 rounded-full blur-[80px] pointer-events-none" />
-          <h3 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight max-w-xl mx-auto leading-tight">
+      <section className="py-16 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-gray-200 bg-white">
+        <div className="relative rounded-xl border border-blue-100 bg-blue-50/20 overflow-hidden px-8 py-14 text-center space-y-5">
+          <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight text-gray-900 max-w-lg mx-auto">
             Secure Your Assets Against Automated Cyber Fraud
           </h3>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+          <p className="text-xs text-gray-500 max-w-sm mx-auto font-semibold">
             Get instant scans, emergency lock protocols, and legal complaint files generated in seconds.
           </p>
           <div className="flex justify-center pt-2">
             <Link
               href="/analyze"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-base font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-[1.02] shadow-[0_0_20px_rgba(0,102,255,0.4)] transition-all duration-200"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 shadow-sm transition-all"
             >
-              Start Free AI Scam Scan <ArrowRight size={16} />
+              Start Free Scan <ArrowRight size={14} />
             </Link>
           </div>
         </div>
       </section>
 
       {/* 9. FOOTER */}
-      <footer className="border-t border-border/30 bg-black/80 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-muted-foreground">
+      <footer className="border-t border-gray-200 bg-white py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-xs font-semibold text-gray-400">
           <div className="flex items-center gap-3">
-            <AppLogo size={28} />
+            <AppLogo size={24} />
             <div className="flex flex-col text-left">
-              <span className="text-xs font-bold text-white tracking-tight">SafeClick Guardian AI</span>
-              <span className="text-[9px] font-mono text-muted-foreground uppercase">Threat Containment System</span>
+              <span className="text-xs font-bold text-gray-800 tracking-tight">SafeClick Guardian AI</span>
+              <span className="text-[9px] font-mono text-gray-400 uppercase tracking-widest font-bold">Threat Containment Node</span>
             </div>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-6 text-xs">
-            <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-            <a href="#process" className="hover:text-foreground transition-colors">How It Works</a>
-            <a href="#stats" className="hover:text-foreground transition-colors">Threat Index</a>
-            <a href="#ai-modules" className="hover:text-foreground transition-colors">AI Core</a>
+          <div className="flex flex-wrap justify-center gap-6">
+            <a href="#features" className="hover:text-gray-900 transition-colors uppercase tracking-wide">Pillars</a>
+            <a href="#process" className="hover:text-gray-900 transition-colors uppercase tracking-wide">Protocol</a>
+            <a href="#stats" className="hover:text-gray-900 transition-colors uppercase tracking-wide">Threat Index</a>
+            <a href="#ai-modules" className="hover:text-gray-900 transition-colors uppercase tracking-wide">AI Core</a>
           </div>
 
-          <div className="text-xs font-mono">
-            &copy; 2026 SafeClick. Hackathon Security Project.
+          <div className="text-[10px] font-mono">
+            &copy; 2026 SafeClick. National Cyber Security Hackathon.
           </div>
         </div>
       </footer>

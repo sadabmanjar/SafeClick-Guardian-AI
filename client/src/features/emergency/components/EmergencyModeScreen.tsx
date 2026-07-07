@@ -4,6 +4,7 @@ import EmergencyChecklist from './EmergencyChecklist';
 import EmergencyStationCard from './EmergencyStationCard';
 import EmergencyQuickForm from './EmergencyQuickForm';
 import TrustedContactsPanel from './TrustedContactsPanel';
+import PageHeader from '@/components/ui/PageHeader';
 
 export default function EmergencyModeScreen() {
   return (
@@ -16,13 +17,12 @@ export default function EmergencyModeScreen() {
         </p>
       </div>
 
-      {/* Page header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Emergency Response</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Immediate help for active cyber fraud — every second counts
-        </p>
-      </div>
+      <PageHeader
+        title="Emergency Response"
+        subtitle="Immediate help for active cyber fraud — every second counts"
+        backHref="/dashboard"
+        backLabel="Dashboard"
+      />
 
       {/* Primary emergency action + checklist */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">

@@ -60,9 +60,9 @@ const checklistItems = [
 ];
 
 const priorityConfig = {
-  critical: { color: 'text-danger', bg: 'bg-danger/10 border-danger/20', label: 'CRITICAL', dotColor: 'bg-danger' },
-  high: { color: 'text-warning', bg: 'bg-warning/10 border-warning/20', label: 'HIGH', dotColor: 'bg-warning' },
-  medium: { color: 'text-primary', bg: 'bg-primary/10 border-primary/20', label: 'MEDIUM', dotColor: 'bg-primary' },
+  critical: { color: 'text-red-600', bg: 'bg-red-50 border-red-200', label: 'CRITICAL', dotColor: 'bg-red-600' },
+  high: { color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200', label: 'HIGH', dotColor: 'bg-amber-600' },
+  medium: { color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200', label: 'MEDIUM', dotColor: 'bg-blue-600' },
 };
 
 export default function EmergencyChecklist() {
@@ -82,29 +82,29 @@ export default function EmergencyChecklist() {
   const progressPct = Math.round((completedCount / totalCount) * 100);
 
   return (
-    <div className="glass-card rounded-2xl border border-border h-full flex flex-col">
+    <div className="bg-white rounded-2xl border border-gray-200 h-full flex flex-col shadow-xs">
       {/* Header */}
-      <div className="px-5 py-4 border-b border-border">
+      <div className="px-5 py-4 border-b border-gray-200">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <AlertTriangle size={16} className="text-warning" />
-            <h3 className="text-sm font-bold text-foreground">Emergency Response Checklist</h3>
+            <AlertTriangle size={16} className="text-amber-500" />
+            <h3 className="text-sm font-bold text-gray-900">Emergency Response Checklist</h3>
           </div>
-          <span className="text-xs font-mono-data text-muted-foreground">
+          <span className="text-xs font-semibold font-mono text-gray-400">
             {completedCount}/{totalCount} done
           </span>
         </div>
         {/* Progress bar */}
-        <div className="h-2 bg-muted rounded-full overflow-hidden">
+        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-500 ${
-              progressPct === 100 ? 'bg-success' : progressPct > 50 ? 'bg-warning' : 'bg-danger'
+              progressPct === 100 ? 'bg-green-600' : progressPct > 50 ? 'bg-amber-500' : 'bg-red-600'
             }`}
             style={{ width: `${progressPct}%` }}
           />
         </div>
         {completedCount === totalCount && (
-          <p className="text-xs text-success font-medium mt-2 flex items-center gap-1.5">
+          <p className="text-xs text-green-700 font-bold mt-2 flex items-center gap-1.5">
             <CheckCircle size={12} />
             All steps completed — you are well protected
           </p>
@@ -112,7 +112,7 @@ export default function EmergencyChecklist() {
       </div>
 
       {/* Checklist items */}
-      <div className="flex-1 overflow-y-auto scrollbar-cyber divide-y divide-border">
+      <div className="flex-1 overflow-y-auto scrollbar-cyber divide-y divide-gray-100">
         {checklistItems.map((item) => {
           const isDone = completed.has(item.id);
           const pConfig = priorityConfig[item.priority];
@@ -120,7 +120,7 @@ export default function EmergencyChecklist() {
             <div
               key={item.id}
               className={`px-5 py-4 transition-all duration-200 cursor-pointer group ${
-                isDone ? 'opacity-60' : 'hover:bg-muted/30'
+                isDone ? 'opacity-60 bg-gray-50/20' : 'hover:bg-gray-50/50'
               }`}
               onClick={() => toggleItem(item.id)}
             >
@@ -132,9 +132,9 @@ export default function EmergencyChecklist() {
                   onClick={(e) => { e.stopPropagation(); toggleItem(item.id); }}
                 >
                   {isDone ? (
-                    <CheckCircle size={20} className="text-success" />
+                    <CheckCircle size={20} className="text-green-600" />
                   ) : (
-                    <Circle size={20} className="text-muted-foreground group-hover:text-foreground transition-colors" />
+                    <Circle size={20} className="text-gray-300 group-hover:text-gray-900 transition-colors" />
                   )}
                 </button>
 
@@ -143,13 +143,13 @@ export default function EmergencyChecklist() {
                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${pConfig.bg} ${pConfig.color}`}>
                       {pConfig.label}
                     </span>
-                    <span className="text-xs font-semibold text-foreground">{item.title}</span>
-                    <div className="flex items-center gap-1 ml-auto text-[10px] text-muted-foreground">
+                    <span className="text-xs font-bold text-gray-900">{item.title}</span>
+                    <div className="flex items-center gap-1 ml-auto text-[10px] text-gray-400 font-semibold font-mono">
                       <Clock size={10} />
                       {item.timeEstimate}
                     </div>
                   </div>
-                  <p className={`text-xs leading-relaxed transition-colors ${isDone ? 'text-muted-foreground line-through' : 'text-muted-foreground'}`}>
+                  <p className={`text-xs leading-relaxed transition-colors font-semibold ${isDone ? 'text-gray-400 line-through' : 'text-gray-500'}`}>
                     {item.description}
                   </p>
                 </div>

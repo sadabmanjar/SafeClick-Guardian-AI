@@ -7,6 +7,8 @@ import authRoutes from './routes/auth.routes';
 import scanRoutes from './routes/scan.routes';
 import complaintRoutes from './routes/complaint.routes';
 import emergencyRoutes from './routes/emergency.routes';
+import heatmapRoutes from './routes/heatmap.routes';
+import { initializeDistricts, ingestNews } from './services/newsIngestion.service';
 
 dotenv.config();
 
@@ -24,6 +26,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/scans', scanRoutes);
 app.use('/api/complaints', complaintRoutes);
 app.use('/api/emergency', emergencyRoutes);
+app.use('/api/heatmap', heatmapRoutes);
 
 // Base route path
 app.get('/health', (req, res) => {
@@ -40,6 +43,17 @@ app.use(errorHandler);
 // Start server listener and database connection
 const startServer = async () => {
   await connectDB();
+  
+  // Seed districts on start
+  await initializeDistricts();
+
+  // Background cron to ingest news every hour (3600000 ms)
+  setInterval(() => {
+    ingestNews().catch((err) => {
+      console.error('[SAFECLICK BACKGROUND WORKER ERROR]:', err);
+    });
+  }, 3600000);
+
   app.listen(port, () => {
     console.log(`[SAFECLICK BACKEND] Operating on secure channel: http://localhost:${port}`);
   });

@@ -13,17 +13,17 @@ import {
 } from 'lucide-react';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { toast } from 'sonner';
-import type { AnalysisResult } from './AnalyzerInputPanel';
+import { ScanResult } from '@/types/common';
 
 const RiskGaugeChart = dynamic(() => import('./RiskGaugeChart'), { ssr: false });
 
 export default function AnalyzerResultPanel() {
-  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [result, setResult] = useState<ScanResult | null>(null);
   const [activeSection, setActiveSection] = useState<'overview' | 'tricks' | 'flags' | 'actions'>('overview');
 
   useEffect(() => {
     const handler = (e: Event) => {
-      const custom = e as CustomEvent<AnalysisResult | null>;
+      const custom = e as CustomEvent<ScanResult | null>;
       setResult(custom.detail);
       setActiveSection('overview');
     };
@@ -65,7 +65,7 @@ export default function AnalyzerResultPanel() {
 
   const handleCopyReport = () => {
     const report = `SafeClick Guardian AI — Scam Analysis Report
-Analysis ID: ${result.analysisId}
+Analysis ID: ${result._id}
 Risk Score: ${result.riskScore}/100 (${result.riskLevel.toUpperCase()})
 Scam Type: ${result.scamType}
 AI Confidence: ${result.confidence}%
@@ -82,7 +82,7 @@ Recommended Actions: ${result.recommendedActions.join(' | ')}`;
     const content = `==================================================
 SAFECLICK GUARDIAN AI - INCIDENT REPORT
 ==================================================
-Analysis ID: ${result.analysisId}
+Analysis ID: ${result._id}
 Scam Category: ${result.scamType}
 Risk Assessment: ${result.riskScore}/100 (${result.riskLevel.toUpperCase()})
 AI Confidence Score: ${result.confidence}%
@@ -107,7 +107,7 @@ SafeClick Security National Hackathon Project
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `safeclick-report-${result.analysisId}.pdf`;
+    link.download = `safeclick-report-${result._id}.pdf`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -132,7 +132,7 @@ SafeClick Security National Hackathon Project
             />
           </div>
           <p className="text-sm text-muted-foreground mt-0.5 truncate">
-            {result.scamType} · ID: <span className="font-mono-data text-xs">{result.analysisId}</span>
+            {result.scamType} · ID: <span className="font-mono-data text-xs">{result._id}</span>
           </p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -245,7 +245,7 @@ SafeClick Security National Hackathon Project
             ) : (
               result.psychologicalTricks.map((trick, i) => (
                 <div
-                  key={`trick-${result.analysisId}-${i}`}
+                  key={`trick-${result._id}-${i}`}
                   className="flex items-start gap-3 p-3 rounded-lg bg-warning/5 border border-warning/15"
                 >
                   <div className="w-6 h-6 rounded-full bg-warning/20 border border-warning/30 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -268,7 +268,7 @@ SafeClick Security National Hackathon Project
             ) : (
               result.redFlags.map((flag, i) => (
                 <div
-                  key={`flag-${result.analysisId}-${i}`}
+                  key={`flag-${result._id}-${i}`}
                   className="flex items-start gap-3 p-3 rounded-lg bg-danger/5 border border-danger/15"
                 >
                   <Flag size={14} className="text-danger flex-shrink-0 mt-1" />
@@ -284,7 +284,7 @@ SafeClick Security National Hackathon Project
             <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-3">Recommended Actions</p>
             {result.recommendedActions.map((action, i) => (
               <div
-                key={`action-${result.analysisId}-${i}`}
+                key={`action-${result._id}-${i}`}
                 className="flex items-start gap-3 p-3 rounded-lg bg-primary/5 border border-primary/15 hover:border-primary/30 transition-colors cursor-default"
               >
                 <div className="w-6 h-6 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center flex-shrink-0 mt-0.5">

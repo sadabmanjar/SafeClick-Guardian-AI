@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Mail, Lock, Eye, EyeOff, ShieldAlert, ArrowRight, Loader2, User, Check } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ShieldAlert, ArrowRight, Loader2, User, Check, AlertCircle, MailCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -16,6 +16,9 @@ export default function SignupForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [signupComplete, setSignupComplete] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
 
   const {
     register,
@@ -44,17 +47,53 @@ export default function SignupForm() {
 
   const onSubmit = async (data: SignupInput) => {
     setIsLoading(true);
+    setAuthError(null);
     try {
       await authService.signUp(data);
-      toast.success('Registration request accepted! Sending 6-digit OTP code.');
-      // Push to OTP verification screen passing the email
-      router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`);
-    } catch (err: any) {
-      toast.error(err.message || 'Account registration failed.');
+      setRegisteredEmail(data.email);
+      setSignupComplete(true);
+      toast.success('Account created! Check your inbox to verify your email.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Account registration failed.';
+      setAuthError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Success state: show email verification prompt
+  if (signupComplete) {
+    return (
+      <div className="w-full max-w-md p-8 rounded-2xl border border-primary/20 bg-zinc-950/80 backdrop-blur-xl shadow-[0_0_50px_rgba(0,102,255,0.15)] space-y-6 text-center">
+        <div className="mx-auto w-14 h-14 rounded-xl bg-success/10 border border-success/20 flex items-center justify-center text-success">
+          <MailCheck size={26} />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-xl font-extrabold tracking-tight bg-gradient-to-b from-white via-zinc-200 to-zinc-500 bg-clip-text text-transparent">
+            Verify Your Email
+          </h2>
+          <p className="text-xs text-muted-foreground leading-relaxed px-2">
+            A verification link has been sent to{' '}
+            <span className="text-foreground font-semibold">{registeredEmail}</span>.
+            Click the link in your email to activate your account.
+          </p>
+        </div>
+        <div className="p-3 rounded-xl bg-zinc-900 border border-border text-xs text-muted-foreground space-y-1">
+          <p className="font-semibold text-foreground">Next Steps:</p>
+          <p>1. Open the email from Supabase / SafeClick</p>
+          <p>2. Click the <span className="text-primary font-semibold">Confirm Email</span> link</p>
+          <p>3. You will be redirected to the dashboard</p>
+        </div>
+        <Link
+          href="/login"
+          className="inline-flex items-center gap-1.5 text-xs text-primary font-bold hover:underline"
+        >
+          Back to Login <ArrowRight size={12} />
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-md p-8 rounded-2xl border border-primary/20 bg-zinc-950/80 backdrop-blur-xl shadow-[0_0_50px_rgba(0,102,255,0.15)] space-y-6">
@@ -66,6 +105,13 @@ export default function SignupForm() {
           Provision your credentials to connect with SafeClick Shield
         </p>
       </div>
+
+      {authError && (
+        <div className="flex items-start gap-2.5 p-3 rounded-xl bg-danger/10 border border-danger/30 text-danger text-xs">
+          <AlertCircle size={14} className="mt-0.5 shrink-0" />
+          <span>{authError}</span>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-left">
         {/* Full Name */}
@@ -120,7 +166,7 @@ export default function SignupForm() {
 
         {/* Password */}
         <div className="space-y-1.5">
-          <label htmlFor="password font-semibold" className="block text-xs font-semibold text-foreground">
+          <label htmlFor="password" className="block text-xs font-semibold text-foreground">
             Passkey Crypt (8+ characters)
           </label>
           <div className="relative">
@@ -144,8 +190,8 @@ export default function SignupForm() {
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
-          
-          {/* Real-time requirements display */}
+
+          {/* Password Strength indicators */}
           <div className="flex flex-wrap gap-1.5 pt-1.5">
             {requirements.map((req) => (
               <span
@@ -201,7 +247,7 @@ export default function SignupForm() {
           )}
         </div>
 
-        {/* Terms and Conditions Checkbox */}
+        {/* Terms */}
         <div className="space-y-1">
           <div className="flex items-start gap-2">
             <input
@@ -222,7 +268,6 @@ export default function SignupForm() {
           )}
         </div>
 
-        {/* Submit */}
         <Button
           type="submit"
           className="w-full h-11 bg-primary text-primary-foreground font-bold shadow-[0_0_15px_rgba(0,102,255,0.4)] rounded-xl flex items-center justify-center gap-2 hover:bg-primary/90 transition-all pt-0 pb-0"
@@ -234,7 +279,7 @@ export default function SignupForm() {
             </>
           ) : (
             <>
-              Register Identity & Send OTP <ArrowRight size={16} />
+              Register Identity &amp; Send OTP <ArrowRight size={16} />
             </>
           )}
         </Button>

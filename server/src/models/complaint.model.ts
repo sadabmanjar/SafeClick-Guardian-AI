@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IComplaint extends Document {
+  complaintId: string;
   userId?: string;
   category: string;
   subCategory?: string;
@@ -30,10 +31,12 @@ export interface IComplaint extends Document {
     hashKey?: string;
   }>;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 const ComplaintSchema: Schema = new Schema({
-  userId: { type: String, required: false },
+  complaintId: { type: String, unique: true, index: true },
+  userId: { type: String, required: false, index: true },
   category: { type: String, required: true },
   subCategory: { type: String },
   incidentDate: { type: Date, required: true },
@@ -63,7 +66,19 @@ const ComplaintSchema: Schema = new Schema({
       hashKey: { type: String },
     },
   ],
-  createdAt: { type: Date, default: Date.now },
+}, {
+  timestamps: true,
+});
+
+// Auto-generate complaint ID before validation
+ComplaintSchema.pre('validate', function (next) {
+  if (!this.complaintId) {
+    // format: CMP-YYYY-XXXXXX
+    const year = new Date().getFullYear();
+    const random = Math.floor(100000 + Math.random() * 900000);
+    this.complaintId = `CMP-${year}-${random}`;
+  }
+  next();
 });
 
 export default mongoose.model<IComplaint>('Complaint', ComplaintSchema);

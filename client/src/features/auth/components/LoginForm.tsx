@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Mail, Lock, Eye, EyeOff, ShieldAlert, ArrowRight, Loader2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Mail, Lock, Eye, EyeOff, ShieldAlert, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { loginSchema, LoginInput } from '../schemas/auth.schema';
@@ -13,8 +13,13 @@ import { Button } from '@/components/ui/button';
 
 export default function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  // Show auth errors passed via URL query param (e.g., expired session)
+  const urlError = searchParams.get('error');
 
   const {
     register,
@@ -31,12 +36,17 @@ export default function LoginForm() {
 
   const onSubmit = async (data: LoginInput) => {
     setIsLoading(true);
+    setAuthError(null);
     try {
       await authService.signInWithPassword(data);
-      toast.success('Successfully logged in!');
-      router.push('/analyze');
-    } catch (err: any) {
-      toast.error(err.message || 'Authentication failed. Please check your credentials.');
+      toast.success('Logged in successfully!');
+      const redirectTo = searchParams.get('redirectTo') || '/analyze';
+      router.push(redirectTo);
+      router.refresh();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Authentication failed.';
+      setAuthError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -52,6 +62,28 @@ export default function LoginForm() {
           Enter credentials to authorize secure console access
         </p>
       </div>
+
+      {/* URL-based error (e.g., session expired, auth callback failed) */}
+      {urlError && (
+        <div className="flex items-start gap-2.5 p-3 rounded-xl bg-danger/10 border border-danger/30 text-danger text-xs">
+          <AlertCircle size={14} className="mt-0.5 shrink-0" />
+          <span>
+            {urlError === 'auth_callback_failed'
+              ? 'Email verification failed. Please try again.'
+              : urlError === 'missing_code'
+              ? 'Invalid verification link. Please request a new one.'
+              : 'Session expired. Please log in again.'}
+          </span>
+        </div>
+      )}
+
+      {/* Inline auth error */}
+      {authError && (
+        <div className="flex items-start gap-2.5 p-3 rounded-xl bg-danger/10 border border-danger/30 text-danger text-xs">
+          <AlertCircle size={14} className="mt-0.5 shrink-0" />
+          <span>{authError}</span>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-left">
         {/* Email Field */}
@@ -120,7 +152,7 @@ export default function LoginForm() {
           )}
         </div>
 
-        {/* Remember Me Option */}
+        {/* Remember Me */}
         <div className="flex items-center gap-2">
           <input
             id="rememberMe"
@@ -134,7 +166,6 @@ export default function LoginForm() {
           </label>
         </div>
 
-        {/* Submit Button */}
         <Button
           type="submit"
           className="w-full h-11 bg-primary text-primary-foreground font-bold shadow-[0_0_15px_rgba(0,102,255,0.4)] rounded-xl flex items-center justify-center gap-2 hover:bg-primary/90 transition-all pt-0 pb-0"
@@ -146,7 +177,7 @@ export default function LoginForm() {
             </>
           ) : (
             <>
-              Decrypt Key & Login <ArrowRight size={16} />
+              Decrypt Key &amp; Login <ArrowRight size={16} />
             </>
           )}
         </Button>
@@ -154,7 +185,7 @@ export default function LoginForm() {
 
       <div className="text-center pt-2">
         <p className="text-xs text-muted-foreground">
-          Don't have a secure token?{' '}
+          Don&apos;t have a secure token?{' '}
           <Link href="/signup" className="font-semibold text-primary hover:underline transition-colors">
             Generate one here
           </Link>

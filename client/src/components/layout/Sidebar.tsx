@@ -2,9 +2,29 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import AppLogo from '@/components/ui/AppLogo';
-import { Shield, AlertTriangle, FileText, MapPin, GraduationCap, BarChart3, ChevronLeft, ChevronRight, Bell, User, Database } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { 
+  Shield, 
+  AlertTriangle, 
+  FileText, 
+  MapPin, 
+  GraduationCap, 
+  BarChart3, 
+  ChevronLeft, 
+  ChevronRight, 
+  Bell, 
+  User, 
+  Database,
+  LayoutDashboard
+} from 'lucide-react';
 
 const navGroups = [
+  {
+    label: 'OVERVIEW',
+    items: [
+      { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', badge: null },
+    ]
+  },
   {
     label: 'PROTECTION',
     items: [
@@ -38,27 +58,27 @@ export default function Sidebar({ activeRoute }: SidebarProps) {
 
   return (
     <aside
-      className={`hidden lg:flex flex-col fixed top-0 left-0 h-full z-40 transition-all duration-300 ease-in-out glass-card border-r border-border ${
+      className={`hidden lg:flex flex-col fixed top-0 left-0 h-full z-40 transition-all duration-200 ease-in-out bg-white border-r border-gray-200 ${
         collapsed ? 'w-16' : 'w-64'
       }`}
     >
-      {/* Logo */}
-      <div className={`flex items-center gap-3 px-4 py-5 border-b border-border ${collapsed ? 'justify-center' : ''}`}>
-        <AppLogo size={32} />
+      {/* Logo Header */}
+      <div className={`flex items-center gap-3 px-5 py-5 border-b border-gray-200 ${collapsed ? 'justify-center' : ''}`}>
+        <AppLogo size={28} />
         {!collapsed && (
           <div className="flex flex-col min-w-0">
-            <span className="text-sm font-semibold text-primary truncate">SafeClick</span>
-            <span className="text-xs text-muted-foreground truncate">Guardian AI</span>
+            <span className="text-sm font-bold text-gray-900 tracking-tight">SafeClick Guardian</span>
+            <span className="text-[10px] text-gray-400 font-mono tracking-widest uppercase">Government Node</span>
           </div>
         )}
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 py-4 overflow-y-auto scrollbar-cyber">
+      {/* Navigation Group Items */}
+      <nav className="flex-1 py-6 overflow-y-auto scrollbar-cyber px-3 space-y-6">
         {navGroups.map((group) => (
-          <div key={`group-${group.label}`} className="mb-6">
+          <div key={`group-${group.label}`} className="space-y-1">
             {!collapsed && (
-              <p className="px-4 mb-2 text-[10px] font-semibold tracking-widest text-muted-foreground uppercase">
+              <p className="px-3 mb-2 text-[10px] font-bold tracking-wider text-gray-400 uppercase">
                 {group.label}
               </p>
             )}
@@ -69,14 +89,22 @@ export default function Sidebar({ activeRoute }: SidebarProps) {
                   key={`nav-${item.href}`}
                   href={item.href}
                   title={collapsed ? item.label : undefined}
-                  className={`flex items-center gap-3 mx-2 px-3 py-2.5 rounded-lg mb-1 transition-all duration-150 group relative ${
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-150 group relative ${
                     isActive
-                      ? 'bg-primary/10 text-primary border border-primary/20 neon-glow-primary' : 'text-secondary-foreground hover:bg-muted hover:text-foreground'
+                      ? 'bg-blue-50 text-blue-600 font-semibold' 
+                      : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
                   }`}
                 >
+                  {isActive && (
+                    <motion.div
+                      layoutId="active-bar"
+                      className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-blue-600 rounded-r-md"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
                   <item.icon
-                    size={18}
-                    className={`flex-shrink-0 ${isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`}
+                    size={16}
+                    className={`flex-shrink-0 ${isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-900'}`}
                   />
                   {!collapsed && (
                     <>
@@ -84,7 +112,9 @@ export default function Sidebar({ activeRoute }: SidebarProps) {
                       {item.badge && (
                         <span
                           className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                            item.badge === 'SOS' ? 'bg-danger/20 text-danger border border-danger/30' : 'bg-primary/20 text-primary border border-primary/30'
+                            item.badge === 'SOS' 
+                              ? 'bg-red-50 text-red-600 border border-red-100' 
+                              : 'bg-blue-50 text-blue-600 border border-blue-100'
                           }`}
                         >
                           {item.badge}
@@ -93,7 +123,7 @@ export default function Sidebar({ activeRoute }: SidebarProps) {
                     </>
                   )}
                   {collapsed && item.badge && (
-                    <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-danger" />
+                    <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-red-500" />
                   )}
                 </Link>
               );
@@ -102,25 +132,34 @@ export default function Sidebar({ activeRoute }: SidebarProps) {
         ))}
       </nav>
 
-      {/* Bottom actions */}
-      <div className="border-t border-border py-3 px-2">
+      {/* Bottom Profile details & Collapse buttons */}
+      <div className="border-t border-gray-200 p-3 bg-gray-50/50">
         {!collapsed && (
-          <div className="flex items-center gap-2 px-3 py-2 mb-2">
-            <div className="w-7 h-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center flex-shrink-0">
-              <User size={13} className="text-primary" />
+          <div className="flex items-center gap-3 px-2 py-2 mb-3 bg-white rounded-lg border border-gray-100 shadow-2xs">
+            <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center flex-shrink-0">
+              <User size={14} className="text-blue-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-foreground truncate">Rahul Sharma</p>
-              <p className="text-[10px] text-muted-foreground truncate">Citizen • MP</p>
+              <p className="text-xs font-bold text-gray-900 truncate">Rahul Sharma</p>
+              <p className="text-[10px] text-gray-400 font-medium truncate">Citizen • MP</p>
             </div>
-            <Bell size={14} className="text-muted-foreground hover:text-primary cursor-pointer transition-colors" />
+            <button className="p-1 rounded-md hover:bg-gray-100 transition-colors" aria-label="Notifications">
+              <Bell size={13} className="text-gray-400 hover:text-gray-600" />
+            </button>
           </div>
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-150 text-xs"
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors text-xs font-medium"
         >
-          {collapsed ? <ChevronRight size={16} /> : <><ChevronLeft size={16} /><span>Collapse</span></>}
+          {collapsed ? (
+            <ChevronRight size={14} />
+          ) : (
+            <>
+              <ChevronLeft size={14} />
+              <span>Collapse Sidebar</span>
+            </>
+          )}
         </button>
       </div>
     </aside>

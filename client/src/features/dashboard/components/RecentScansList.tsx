@@ -38,29 +38,29 @@ const scans = [
 
 export default function RecentScansList() {
   return (
-    <div className="glass-card rounded-xl border border-border p-5 flex flex-col justify-between h-full">
+    <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col justify-between h-full shadow-sm">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Audit Feed</h3>
-            <p className="text-sm text-foreground font-semibold mt-0.5">Recent Threat Scans</p>
+            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Audit Feed</h3>
+            <p className="text-sm text-gray-900 font-semibold mt-0.5">Recent Threat Scans</p>
           </div>
-          <Link href="/analyze" className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1">
+          <Link href="/analyze" className="text-[10px] font-bold text-blue-600 hover:underline flex items-center gap-1">
             View All <ArrowRight size={10} />
           </Link>
         </div>
 
-        <div className="divide-y divide-border/50">
+        <div className="divide-y divide-gray-100">
           {scans.map((scan, idx) => (
-            <div key={`scan-${idx}`} className="py-3 flex items-start justify-between gap-3 first:pt-0 last:pb-0">
+            <div key={`scan-${idx}`} className="py-3.5 flex items-start justify-between gap-3 first:pt-0 last:pb-0">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[9px] font-bold text-muted-foreground bg-zinc-900 border border-border/50 px-1.5 py-0.5 rounded font-mono uppercase">
+                  <span className="text-[9px] font-bold text-gray-500 bg-gray-50 border border-gray-150 px-1.5 py-0.5 rounded font-mono uppercase">
                     {scan.source}
                   </span>
-                  <span className="text-[9px] text-muted-foreground font-mono ml-auto">{scan.date}</span>
+                  <span className="text-[9px] text-gray-400 font-medium ml-auto">{scan.date}</span>
                 </div>
-                <p className="text-xs text-foreground truncate leading-normal">{scan.detail}</p>
+                <p className="text-xs text-gray-800 truncate leading-normal">{scan.detail}</p>
               </div>
               <StatusBadge variant={scan.risk} label={scan.label} dot className="flex-shrink-0" />
             </div>

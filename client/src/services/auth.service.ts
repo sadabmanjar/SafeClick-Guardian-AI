@@ -42,7 +42,8 @@ export const authService = {
     await new Promise((resolve) => setTimeout(resolve, 800)); // Simulate API latency
 
     // Check mock credentials
-    if (data.email === 'admin@safeclick.gov' && data.password !== 'SafeClick123!') {
+    const validPasswords = ['SafeClick123!', 'Safeclick@123!', 'Safeclick123!'];
+    if (data.email === 'admin@safeclick.gov' && !validPasswords.includes(data.password)) {
       throw new Error('Invalid email or password');
     }
 

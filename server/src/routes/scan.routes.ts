@@ -1,15 +1,20 @@
 import { Router } from 'express';
-import { createScan, getScans } from '../controllers/scan.controller';
+import {
+  createScan,
+  getScans,
+  getScanById,
+  deleteScan,
+} from '../controllers/scan.controller';
 import { authenticateJWT } from '../middlewares/auth.middleware';
-import { validateBody } from '../middlewares/validate.middleware';
-import { createScanSchema } from '../validators/schema';
 
 const router = Router();
 
-// Apply auth protection middleware to all scan endpoints
-router.use(authenticateJWT as any);
+// Protect all scan routes
+router.use(authenticateJWT);
 
-router.post('/', validateBody(createScanSchema), createScan);
-router.get('/', getScans);
+router.post('/analyze', createScan);
+router.get('/history', getScans);
+router.get('/:id', getScanById);
+router.delete('/:id', deleteScan);
 
 export default router;

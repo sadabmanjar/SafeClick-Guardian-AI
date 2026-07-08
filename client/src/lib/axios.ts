@@ -1,9 +1,8 @@
-import axios from "axios";
 
-export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
-  timeout: 30000,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+/**
+ * @deprecated Use @/lib/api instead.
+ * This file is kept for backward compatibility only.
+ */
+export { apiClient as api, apiClient } from './api';
+export { default } from './api';
+

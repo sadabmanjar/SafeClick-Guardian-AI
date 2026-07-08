@@ -100,17 +100,17 @@ export default function QuizModal({ onClose, onUnlockCertificate }: QuizModalPro
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-2xl border border-primary/20 bg-zinc-950 p-6 space-y-6 shadow-[0_0_50px_rgba(0,102,255,0.2)] float-up">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/35 backdrop-blur-xs">
+      <div className="w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-6 space-y-6 shadow-xl relative animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-border/50 pb-4">
+        <div className="flex items-center justify-between border-b border-gray-100 pb-4">
           <div className="flex items-center gap-2">
-            <ShieldCheck size={18} className="text-primary animate-pulse" />
-            <span className="text-sm font-bold text-foreground">Cyber Guard Security Quiz</span>
+            <ShieldCheck size={18} className="text-blue-600 animate-pulse" />
+            <span className="text-sm font-bold text-gray-900">Cyber Guard Security Quiz</span>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+            className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-900 transition-colors"
           >
             <X size={18} />
           </button>
@@ -119,29 +119,29 @@ export default function QuizModal({ onClose, onUnlockCertificate }: QuizModalPro
         {/* Content */}
         {!quizFinished ? (
           <div className="space-y-4">
-            <div className="flex justify-between text-[10px] font-mono text-muted-foreground uppercase">
+            <div className="flex justify-between text-[10px] font-bold font-mono text-gray-400 uppercase">
               <span>Question {currentIdx + 1} of {quizQuestions.length}</span>
               <span>Passing: 2/3 Correct</span>
             </div>
 
-            <h4 className="text-sm font-bold text-foreground leading-snug">{activeQuestion.text}</h4>
+            <h4 className="text-sm font-bold text-gray-900 leading-snug">{activeQuestion.text}</h4>
 
             {/* Options list */}
             <div className="space-y-2 pt-2">
               {activeQuestion.options.map((opt, i) => {
-                let optionStyle = 'border-border/50 bg-zinc-900/30 text-muted-foreground hover:border-primary/45 hover:text-foreground';
+                let optionStyle = 'border-gray-200 bg-white text-gray-600 hover:border-blue-500/40 hover:text-gray-900 font-semibold';
                 
                 if (selectedOpt === i) {
-                  optionStyle = 'border-primary bg-primary/5 text-primary';
+                  optionStyle = 'border-blue-600 bg-blue-50/50 text-blue-600 font-bold';
                 }
 
                 if (isAnswered) {
                   if (i === activeQuestion.correct) {
-                    optionStyle = 'border-success bg-success/10 text-success font-semibold';
+                    optionStyle = 'border-green-200 bg-green-50 text-green-700 font-bold';
                   } else if (selectedOpt === i) {
-                    optionStyle = 'border-danger bg-danger/10 text-danger';
+                    optionStyle = 'border-rose-200 bg-rose-50 text-rose-600 font-bold';
                   } else {
-                    optionStyle = 'border-border/20 text-muted-foreground/40 cursor-not-allowed';
+                    optionStyle = 'border-gray-100 text-gray-400 cursor-not-allowed';
                   }
                 }
 
@@ -160,8 +160,8 @@ export default function QuizModal({ onClose, onUnlockCertificate }: QuizModalPro
 
             {/* Explanation box */}
             {isAnswered && (
-              <div className="p-3 bg-zinc-900 border border-border/50 rounded-lg text-[11px] text-muted-foreground leading-relaxed float-up">
-                <strong className="text-foreground">AI Review:</strong> {activeQuestion.explanation}
+              <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-[11px] text-gray-500 leading-relaxed font-semibold">
+                <strong className="text-gray-900">AI Review:</strong> {activeQuestion.explanation}
               </div>
             )}
 
@@ -171,14 +171,14 @@ export default function QuizModal({ onClose, onUnlockCertificate }: QuizModalPro
                 <Button
                   onClick={handleSubmitAnswer}
                   disabled={selectedOpt === null}
-                  className="h-10 bg-primary text-primary-foreground font-bold rounded-lg flex items-center justify-center gap-1 hover:bg-primary/90 transition-all pt-0 pb-0"
+                  className="h-10 bg-blue-600 text-white font-bold rounded-lg flex items-center justify-center gap-1 hover:bg-blue-700 transition-all pt-0 pb-0 shadow-sm"
                 >
                   Confirm Answer <ArrowRight size={14} />
                 </Button>
               ) : (
                 <Button
                   onClick={handleNext}
-                  className="h-10 bg-primary text-primary-foreground font-bold rounded-lg flex items-center justify-center gap-1 hover:bg-primary/90 transition-all pt-0 pb-0"
+                  className="h-10 bg-blue-600 text-white font-bold rounded-lg flex items-center justify-center gap-1 hover:bg-blue-700 transition-all pt-0 pb-0 shadow-sm"
                 >
                   {currentIdx < quizQuestions.length - 1 ? 'Next Question' : 'Evaluate Results'} <ArrowRight size={14} />
                 </Button>
@@ -188,19 +188,19 @@ export default function QuizModal({ onClose, onUnlockCertificate }: QuizModalPro
         ) : (
           /* Finished Screen */
           <div className="text-center space-y-4 py-4">
-            <div className="mx-auto w-12 h-12 rounded-full bg-success/15 border border-success/35 flex items-center justify-center text-success mb-2">
+            <div className="mx-auto w-12 h-12 rounded-full bg-green-50 border border-green-200 flex items-center justify-center text-green-700 mb-2">
               <CheckCircle size={24} className="animate-pulse" />
             </div>
             
-            <h4 className="text-lg font-bold text-foreground">Cyber Assessment Evaluation</h4>
-            <p className="text-xs text-muted-foreground max-w-sm mx-auto leading-relaxed">
-              Assessment finished. You answered <strong className="text-foreground">{score} of {quizQuestions.length}</strong> questions correctly.
+            <h4 className="text-lg font-bold text-gray-900">Cyber Assessment Evaluation</h4>
+            <p className="text-xs text-gray-500 max-w-sm mx-auto leading-relaxed font-semibold">
+              Assessment finished. You answered <strong className="text-gray-900">{score} of {quizQuestions.length}</strong> questions correctly.
             </p>
 
             <div className="pt-4 flex gap-3">
               <Button
                 onClick={handleCompleteQuiz}
-                className="flex-1 h-11 bg-primary text-primary-foreground font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-primary/90 transition-all pt-0 pb-0"
+                className="flex-1 h-11 bg-blue-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-blue-700 transition-all pt-0 pb-0 shadow-sm"
               >
                 {score >= 2 ? 'Unlock Certificate & Return' : 'Close Assessment'}
               </Button>

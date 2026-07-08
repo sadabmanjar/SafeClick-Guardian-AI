@@ -1,6 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware';
-import Complaint from '../models/complaint.model';
+import { submitComplaint, getComplaintsHistory, getComplaintById as getComplaint } from '../services/complaint.service';
+import { sendSuccess } from '../utils/response.util';
 
 export const createComplaint = async (
   req: AuthenticatedRequest,
@@ -14,13 +15,8 @@ export const createComplaint = async (
       ...req.body,
     };
 
-    const newComplaint = new Complaint(complaintData);
-    await newComplaint.save();
-
-    res.status(201).json({
-      status: 'success',
-      data: newComplaint,
-    });
+    const newComplaint = await submitComplaint(complaintData);
+    sendSuccess(res, 201, 'Complaint submitted successfully', newComplaint);
   } catch (error) {
     next(error);
   }
@@ -33,13 +29,26 @@ export const getComplaints = async (
 ): Promise<void> => {
   try {
     const userId = req.user?.userId;
-    const complaints = await Complaint.find({ userId }).sort({ createdAt: -1 });
+    if (!userId) throw new Error('User ID required');
 
-    res.status(200).json({
-      status: 'success',
-      results: complaints.length,
-      data: complaints,
-    });
+    const complaints = await getComplaintsHistory(userId);
+    sendSuccess(res, 200, 'Complaints retrieved successfully', complaints);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getComplaintById = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    const { id } = req.params;
+
+    const complaint = await getComplaint(id as string, userId);
+    sendSuccess(res, 200, 'Complaint retrieved successfully', complaint);
   } catch (error) {
     next(error);
   }

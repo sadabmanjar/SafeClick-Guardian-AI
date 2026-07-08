@@ -1,6 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware';
-import Alert from '../models/alert.model';
+import { createAlert, getAlertsHistory } from '../services/emergency.service';
+import { sendSuccess } from '../utils/response.util';
 
 export const triggerAlert = async (
   req: AuthenticatedRequest,
@@ -11,22 +12,16 @@ export const triggerAlert = async (
     const userId = req.user?.userId;
     const { location, contactsNotified, alertType } = req.body;
 
-    const newAlert = new Alert({
+    const newAlert = await createAlert({
       userId,
       location,
       contactsNotified,
       alertType,
     });
 
-    await newAlert.save();
+    console.log(`[SOS TRIGGERED] User ${userId} active alert dispatched to: ${(contactsNotified || []).join(', ')}`);
 
-    console.log(`[SOS TRIGGERED] User ${userId} active alert dispatched to: ${contactsNotified.join(', ')}`);
-
-    res.status(201).json({
-      status: 'success',
-      message: 'Emergency SOS Broadcast Dispatched Securely',
-      data: newAlert,
-    });
+    sendSuccess(res, 201, 'Emergency SOS Broadcast Dispatched Securely', newAlert);
   } catch (error) {
     next(error);
   }
@@ -39,13 +34,10 @@ export const getAlerts = async (
 ): Promise<void> => {
   try {
     const userId = req.user?.userId;
-    const alerts = await Alert.find({ userId }).sort({ createdAt: -1 });
+    if (!userId) throw new Error('User ID required');
 
-    res.status(200).json({
-      status: 'success',
-      results: alerts.length,
-      data: alerts,
-    });
+    const alerts = await getAlertsHistory(userId);
+    sendSuccess(res, 200, 'Emergency alerts retrieved successfully', alerts);
   } catch (error) {
     next(error);
   }

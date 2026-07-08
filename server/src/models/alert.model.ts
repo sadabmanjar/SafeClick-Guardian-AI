@@ -11,10 +11,11 @@ export interface IAlert extends Document {
   alertType: 'SOS_BUTTON' | 'SMS_DISPATCH' | 'MANUAL_TRIGGER';
   resolved: boolean;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 const AlertSchema: Schema = new Schema({
-  userId: { type: String, required: false },
+  userId: { type: String, required: false, index: true },
   location: {
     latitude: { type: Number },
     longitude: { type: Number },
@@ -27,7 +28,8 @@ const AlertSchema: Schema = new Schema({
     default: 'SOS_BUTTON',
   },
   resolved: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now },
+}, {
+  timestamps: true,
 });
 
 export default mongoose.model<IAlert>('Alert', AlertSchema);

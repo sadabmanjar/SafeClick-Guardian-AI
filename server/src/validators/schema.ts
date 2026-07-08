@@ -12,8 +12,14 @@ export const loginSchema = z.object({
 });
 
 export const createScanSchema = z.object({
-  content: z.string().min(1, 'Content is required to analyze'),
+  content: z.string()
+    .min(1, 'Scan content payload cannot be empty')
+    .max(20000, 'Payload size exceeded (maximum 20,000 characters allowed)'),
   contentType: z.enum(['text', 'url', 'image']),
+  location: z.object({
+    latitude: z.number(),
+    longitude: z.number(),
+  }).optional(),
 });
 
 export const triggerAlertSchema = z.object({

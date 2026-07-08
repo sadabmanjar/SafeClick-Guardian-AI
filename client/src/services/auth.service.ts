@@ -1,129 +1,129 @@
 /**
- * Mock Authentication Service simulating Supabase authentication flow.
- * In production, these calls will connect to Supabase auth client endpoints.
+ * Auth Service
+ * Wraps Supabase auth calls and the backend's /api/auth/status health check.
+ *
+ * Authentication is Supabase-managed — no JWT generation happens in Express.
+ * This service also provides getAccessToken() for injecting Bearer tokens
+ * into Axios requests via the apiClient interceptor.
  */
 
-import { LoginInput, SignupInput, ForgotPasswordInput, OTPVerificationInput } from '../features/auth/schemas/auth.schema';
-
-export interface UserSession {
-  user: {
-    id: string;
-    email: string;
-    fullName?: string;
-    role: string;
-  } | null;
-  session: {
-    accessToken: string;
-    expiresIn: number;
-  } | null;
-}
-
-const SESSION_KEY = 'safeclick_guardian_session';
+import { supabase } from '@/lib/supabase';
+import { LoginInput, SignupInput, ForgotPasswordInput } from '@/features/auth/schemas/auth.schema';
 
 export const authService = {
   /**
-   * Helper to fetch current session from local storage
-   */
-  getCurrentSession(): UserSession | null {
-    if (typeof window === 'undefined') return null;
-    const sessionStr = localStorage.getItem(SESSION_KEY);
-    if (!sessionStr) return null;
-    try {
-      return JSON.parse(sessionStr);
-    } catch {
-      return null;
-    }
-  },
 
-  /**
-   * Simulates login with password
-   */
-  async signInWithPassword(data: LoginInput): Promise<UserSession> {
-    await new Promise((resolve) => setTimeout(resolve, 800)); // Simulate API latency
+   * Sign up a new user via Supabase.
+   * Inserts a profile row with default role = 'citizen'.
+   * Supabase sends a real email verification link.
 
-    // Check mock credentials
-    if (data.email === 'admin@safeclick.gov' && data.password !== 'SafeClick123!') {
-      throw new Error('Invalid email or password');
-    }
-
-    const mockSession: UserSession = {
-      user: {
-        id: 'usr_mock_001',
-        email: data.email,
-        fullName: data.email.split('@')[0],
-        role: data.email.includes('admin') || data.email.includes('police') ? 'admin' : 'citizen',
-      },
-      session: {
-        accessToken: 'mock_jwt_token_' + Math.random().toString(36).substr(2),
-        expiresIn: 3600,
-      },
-    };
-
-    localStorage.setItem(SESSION_KEY, JSON.stringify(mockSession));
-    return mockSession;
-  },
-
-  /**
-   * Simulates signup flow, redirecting to OTP code verification
    */
   async signUp(data: SignupInput): Promise<{ message: string; email: string }> {
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API latency
+    const { data: authData, error } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+      options: {
+        data: { full_name: data.fullName },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
 
-    // If duplicate check (mock check)
-    if (data.email === 'existing@safeclick.gov') {
-      throw new Error('User already exists');
+    if (error) throw new Error(mapSupabaseError(error.message));
+
+    if (authData.user) {
+      const { error: profileError } = await supabase.from('profiles').upsert({
+        id: authData.user.id,
+        email: data.email,
+        full_name: data.fullName,
+        role: 'citizen',
+      });
+      if (profileError) {
+        console.error('[authService.signUp] Profile insert error:', profileError.message);
+      }
     }
 
     return {
-      message: 'Signup successful. An OTP code has been sent to your email.',
+      message: 'Account created! A verification email has been sent to your inbox.',
       email: data.email,
     };
   },
 
   /**
-   * Simulates verification of 6-digit OTP code sent to user email
+   * Sign in via Supabase with email + password.
+   * The resulting Supabase session provides the access_token for API calls.
    */
-  async verifyOtp(data: OTPVerificationInput): Promise<UserSession> {
-    await new Promise((resolve) => setTimeout(resolve, 800)); // Simulate API latency
-
-    // Simulate OTP checks (e.g., 123456)
-    if (data.otp !== '123456') {
-      throw new Error('Invalid or expired OTP code');
-    }
-
-    const mockSession: UserSession = {
-      user: {
-        id: 'usr_mock_002',
-        email: data.email,
-        fullName: 'New Guardian User',
-        role: 'citizen',
-      },
-      session: {
-        accessToken: 'mock_jwt_token_' + Math.random().toString(36).substr(2),
-        expiresIn: 3600,
-      },
-    };
-
-    localStorage.setItem(SESSION_KEY, JSON.stringify(mockSession));
-    return mockSession;
+  async signInWithPassword(data: LoginInput): Promise<void> {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: data.email,
+      password: data.password,
+    });
+    if (error) throw new Error(mapSupabaseError(error.message));
   },
 
   /**
-   * Simulates sending password reset link/email
-   */
-  async resetPasswordForEmail(data: ForgotPasswordInput): Promise<{ message: string }> {
-    await new Promise((resolve) => setTimeout(resolve, 600)); // Simulate API latency
-
-    return {
-      message: 'Password reset link has been dispatched to your email address.',
-    };
-  },
-
-  /**
-   * Sign out current user session
+   * Sign out the current Supabase session.
    */
   async signOut(): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, 400));
-    localStorage.removeItem(SESSION_KEY);
-  }
+    const { error } = await supabase.auth.signOut();
+    if (error) throw new Error(mapSupabaseError(error.message));
+  },
+
+  /**
+   * Returns the current Supabase session object.
+   * Used by apiClient interceptor to attach the Bearer token.
+   */
+  async getSession() {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error) throw new Error(mapSupabaseError(error.message));
+    return session;
+  },
+
+  /**
+   * Returns the raw Supabase access token for direct use.
+   */
+  async getAccessToken(): Promise<string | null> {
+    const session = await this.getSession();
+    return session?.access_token ?? null;
+  },
+
+  /**
+   * Sends a real Supabase password reset email.
+   */
+  async resetPasswordForEmail(data: ForgotPasswordInput): Promise<{ message: string }> {
+    const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
+      redirectTo: `${window.location.origin}/auth/reset-password`,
+    });
+    if (error) throw new Error(mapSupabaseError(error.message));
+    return { message: 'Password reset link has been sent to your email address.' };
+  },
 };
+
+// ── Error mapper ─────────────────────────────────────────────────────────────
+
+function mapSupabaseError(message: string): string {
+  const m = message?.toLowerCase() || '';
+
+  if (m.includes('invalid login credentials') || m.includes('invalid password')) {
+    return 'Incorrect email or password. Please verify your credentials.';
+  }
+  if (m.includes('email not confirmed')) {
+    return 'Your email has not been verified. Please check your inbox for the verification link.';
+  }
+  if (m.includes('user already registered')) {
+    return 'An account with this email already exists. Please log in instead.';
+  }
+  if (m.includes('rate limit')) {
+    return 'Too many login attempts. Please wait a few minutes before trying again.';
+  }
+  if (m.includes('network') || m.includes('fetch failed')) {
+    return 'Network error. Please check your internet connection.';
+  }
+  if (m.includes('expired') || m.includes('invalid token')) {
+    return 'Your session has expired. Please log in again.';
+  }
+  if (m.includes('password should be')) {
+    return 'Password must be at least 6 characters long.';
+  }
+
+  return message || 'An unexpected error occurred. Please try again.';
+}

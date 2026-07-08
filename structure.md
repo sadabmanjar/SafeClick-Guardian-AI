@@ -174,14 +174,24 @@ SafeClick-Guardian-AI/
 │   │   │   └── scan.routes.ts       # Threat AI scan analyzer routes
 │   │   ├── services/                # Business logic layer
 │   │   │   └── gemini.service.ts    # Gemini AI API request service
+│   │   ├── utils/                   # Threat detector engines/utilities
+│   │   │   ├── domainAnalyzer.ts    # Typo/entropy domain analyzer
+│   │   │   ├── emailDetector.ts     # Free/temp mail detector
+│   │   │   ├── keywordDetector.ts   # Weighted keywords scanner
+│   │   │   ├── phoneDetector.ts     # Intl virtual numbers/wa/tg detector
+│   │   │   ├── riskEngine.ts        # Threat scoring calculation engine
+│   │   │   └── urlDetector.ts       # IP/shortener/TLD link detector
 │   │   ├── validators/              # Input validation schemas
 │   │   │   └── schema.ts            # Zod validation schema files
 │   │   └── server.ts                # Express application entry point
 │   ├── package.json                 # Backend dependencies and scripts
 │   └── tsconfig.json                # TypeScript compiler configuration
 │
-└── shared/                          # Shared utilities and configurations between client & server
-    ├── constants/                   # Shared constants
-    ├── interfaces/                  # Shared TypeScript interfaces
-    └── types/                       # Shared TypeScript types
+├── shared/                          # Shared utilities and configurations between client & server
+│   ├── constants/                   # Shared constants
+│   ├── interfaces/                  # Shared TypeScript interfaces
+│   └── types/                       # Shared TypeScript types
+│
+├── structure.md                     # Project tree catalog
+└── test_scenarios.md                # Threat detection scenarios & JSON schemas
 ```

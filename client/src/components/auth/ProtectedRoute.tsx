@@ -6,18 +6,18 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    console.log('[PROTECTED ROUTE GUARD] User:', user ? user.email : 'NONE', '| Loading:', loading);
-    if (!loading && !user) {
+    console.log('[PROTECTED ROUTE GUARD] User:', user ? user.email : 'NONE', '| Loading:', isLoading);
+    if (!isLoading && !user) {
       console.log('[PROTECTED ROUTE GUARD] Unauthorized! Redirecting to /login...');
       router.push('/login');
     }
-  }, [user, loading, router]);
+  }, [user, isLoading, router]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#FAFAF8] text-gray-900">
         <div className="flex flex-col items-center gap-3">

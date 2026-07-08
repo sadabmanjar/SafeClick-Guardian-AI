@@ -21,94 +21,19 @@ const inputTabs = [
   { id: 'qr', label: 'QR Code', icon: QrCode, placeholder: '' },
 ];
 
-export type AnalysisResult = {
-  riskScore: number;
-  riskLevel: 'safe' | 'low' | 'medium' | 'high' | 'critical';
-  scamType: string;
-  confidence: number;
-  explanation: string;
-  psychologicalTricks: string[];
-  redFlags: string[];
-  recommendedActions: string[];
-  analysisId: string;
-};
+import { ScanResult } from '@/types/common';
+import { useScan } from '@/hooks/useScan';
 
-// Mock analysis results for demo
-const mockResults: Record<string, AnalysisResult> = {
-  high: {
-    riskScore: 87,
-    riskLevel: 'high',
-    scamType: 'UPI / Banking Phishing',
-    confidence: 94,
-    explanation: 'This message exhibits multiple high-risk indicators of a banking phishing scam. The message uses urgency tactics ("claim now"), contains a suspicious non-official domain (sbi-reward.xyz instead of sbi.co.in), and requests sensitive action (OTP sharing). The URL pattern matches known phishing infrastructure targeting Indian banking customers.',
-    psychologicalTricks: [
-      'False urgency — "claim now" creates time pressure to bypass rational thinking',
-      'Authority impersonation — claims to be from SBI (trusted institution)',
-      'Reward baiting — large cashback amount triggers greed response',
-      'Social proof — "selected" implies exclusivity and legitimacy',
-    ],
-    redFlags: [
-      'Non-official domain: sbi-reward.xyz (official: sbi.co.in)',
-      'Unsolicited cashback offer with no prior transaction',
-      'OTP included in message — banks never send OTPs unsolicited',
-      'Clickable link leading to unknown domain',
-      'No official SBI branding or reference number',
-    ],
-    recommendedActions: [
-      'Do NOT click the link or share the OTP',
-      'Block and report the sender number immediately',
-      'Report to SBI Cyber Cell: 1800-11-2211',
-      'File complaint on cybercrime.gov.in (NCRP portal)',
-      'Call 1930 if you have already clicked or shared details',
-    ],
-    analysisId: 'SCAN-2026-001847',
-  },
-  medium: {
-    riskScore: 54,
-    riskLevel: 'medium',
-    scamType: 'Fake Job Offer',
-    confidence: 78,
-    explanation: 'This message shows characteristics of a fake job offer scam. While some elements appear legitimate, the offer of high salary with minimal qualifications and request for upfront fees are classic indicators of employment fraud.',
-    psychologicalTricks: [
-      'Financial desperation exploitation — targets job seekers',
-      'Too-good-to-be-true salary offer to bypass critical thinking',
-      'Urgency — "limited positions" creates artificial scarcity',
-    ],
-    redFlags: [
-      'Salary offer significantly above market rate',
-      'Request for registration fee or security deposit',
-      'Generic job description with no company verification',
-    ],
-    recommendedActions: [
-      'Verify company on MCA21 portal (mca.gov.in)',
-      'Never pay any upfront fees for job offers',
-      'Check company reviews on LinkedIn/Glassdoor',
-      'Report suspicious job offers to police',
-    ],
-    analysisId: 'SCAN-2026-001848',
-  },
-  safe: {
-    riskScore: 8,
-    riskLevel: 'safe',
-    scamType: 'No Threat Detected',
-    confidence: 91,
-    explanation: 'This content appears to be legitimate. No phishing patterns, suspicious domains, urgency manipulation, or known scam signatures were detected. The message follows normal communication patterns.',
-    psychologicalTricks: [],
-    redFlags: [],
-    recommendedActions: [
-      'Content appears safe — no immediate action required',
-      'Always verify sender identity for financial messages',
-      'Keep your SafeClick app updated for latest threat patterns',
-    ],
-    analysisId: 'SCAN-2026-001849',
-  },
-};
+interface AnalyzerInputPanelProps {
+  onResult?: (result: ScanResult | null) => void;
+}
 
+// We use a global event approach via CustomEvent to communicate result to sibling
 export default function AnalyzerInputPanel() {
   const [activeTab, setActiveTab] = useState('sms');
   const [inputText, setInputText] = useState('');
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
+  const { analyze, isLoading: isAnalyzing } = useScan();
   const [uploadedFileName, setUploadedFileName] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -133,55 +58,19 @@ export default function AnalyzerInputPanel() {
       return;
     }
 
-    setIsAnalyzing(true);
+    const contentType = activeTab === 'screenshot' || activeTab === 'qr' ? 'image' : activeTab === 'url' ? 'url' : 'text';
+    const content = hasInput && (activeTab === 'screenshot' || activeTab === 'qr') ? uploadedFileName : inputText;
 
-    let result: AnalysisResult;
-    try {
-      // Real backend integration point
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-      const token = localStorage.getItem('token');
-      
-      const res = await fetch(`${apiUrl}/scan`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify({
-          content: activeTab === 'screenshot' || activeTab === 'qr' ? 'image-upload-simulated' : inputText,
-          contentType: activeTab === 'url' ? 'url' : activeTab === 'email' ? 'text' : activeTab === 'sms' ? 'text' : 'image'
-        })
+    const result = await analyze({ content, contentType });
+
+    if (result) {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('scam-analysis-result', { detail: result }));
+      }
+      toast.success(`Analysis complete — Risk Score: ${result.riskScore}/100`, {
+        description: `Scam Type: ${result.scamType}`,
       });
-
-      if (!res.ok) {
-        throw new Error('API Request Failed');
-      }
-
-      const data = await res.json();
-      result = data.data; // The server returns { status: 'success', data: newScan }
-    } catch (e) {
-      console.error('API Error, falling back to mock results:', e);
-      // Fallback if backend is unreachable
-      const lowerInput = inputText.toLowerCase();
-      if (lowerInput.includes('otp') || lowerInput.includes('click') || lowerInput.includes('reward') || uploadedFile) {
-        result = mockResults.high;
-      } else if (lowerInput.includes('job') || lowerInput.includes('salary')) {
-        result = mockResults.medium;
-      } else {
-        result = mockResults.safe;
-      }
     }
-
-    setIsAnalyzing(false);
-
-    // Dispatch result to sibling via custom event
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('scam-analysis-result', { detail: result }));
-    }
-
-    toast.success(`Analysis complete — Risk Score: ${result.riskScore}/100`, {
-      description: `Scam Type: ${result.scamType}`,
-    });
   };
 
   const handleClear = () => {

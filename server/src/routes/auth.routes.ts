@@ -1,11 +1,10 @@
 import { Router } from 'express';
-import { signup, login } from '../controllers/auth.controller';
-import { validateBody } from '../middlewares/validate.middleware';
-import { signupSchema, loginSchema } from '../validators/schema';
+import { getAuthStatus } from '../controllers/auth.controller';
 
 const router = Router();
 
-router.post('/signup', validateBody(signupSchema), signup);
-router.post('/login', validateBody(loginSchema), login);
+// Authentication is fully managed by Supabase on the frontend.
+// This route only provides a status endpoint for health checks.
+router.get('/status', getAuthStatus);
 
 export default router;

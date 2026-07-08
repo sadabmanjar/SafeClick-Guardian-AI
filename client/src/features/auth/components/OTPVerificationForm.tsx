@@ -1,139 +1,135 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { ShieldCheck, ShieldAlert, ArrowRight, Loader2, Mail } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { ShieldCheck, MailCheck, ArrowRight, Loader2, RefreshCw } from 'lucide-react';
+import Link from 'next/link';
 import { toast } from 'sonner';
-import { otpVerificationSchema, OTPVerificationInput } from '../schemas/auth.schema';
-import { authService } from '@/services/auth.service';
+import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 
+/**
+ * Email Verification Screen
+ * Shown after signup to inform users to check their inbox.
+ * Provides a resend verification email option.
+ *
+ * Note: Supabase handles email verification via email links — not 6-digit OTPs.
+ * When the user clicks the email link, they are redirected to /auth/callback
+ * which exchanges the code for a real session.
+ */
 export default function OTPVerificationForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const [isLoading, setIsLoading] = useState(false);
-
   const emailParam = searchParams.get('email') || '';
+  const [isResending, setIsResending] = useState(false);
+  const [resentCount, setResentCount] = useState(0);
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm<OTPVerificationInput>({
-    resolver: zodResolver(otpVerificationSchema),
-    defaultValues: {
-      email: emailParam,
-      otp: '',
-    },
-  });
-
-  useEffect(() => {
-    if (emailParam) {
-      setValue('email', emailParam);
+  const handleResendVerification = async () => {
+    if (!emailParam) {
+      toast.error('Email address not found. Please sign up again.');
+      return;
     }
-  }, [emailParam, setValue]);
 
-  const onSubmit = async (data: OTPVerificationInput) => {
-    setIsLoading(true);
+    if (resentCount >= 3) {
+      toast.error('Maximum resend attempts reached. Please wait before trying again.');
+      return;
+    }
+
+    setIsResending(true);
     try {
-      await authService.verifyOtp(data);
-      toast.success('Identity authorized successfully!');
-      router.push('/analyze');
-    } catch (err: any) {
-      toast.error(err.message || 'OTP verification failed. Mock code is: 123456');
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: emailParam,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        toast.error(error.message || 'Failed to resend verification email.');
+        return;
+      }
+
+      setResentCount((prev) => prev + 1);
+      toast.success('Verification email resent! Check your inbox.');
+    } catch {
+      toast.error('Failed to resend verification email. Please try again.');
     } finally {
-      setIsLoading(false);
+      setIsResending(false);
     }
   };
 
   return (
-    <div className="w-full max-w-md p-8 rounded-2xl border border-primary/20 bg-zinc-950/80 backdrop-blur-xl shadow-[0_0_50px_rgba(0,102,255,0.15)] space-y-6">
-      <div className="text-center space-y-2">
-        <div className="mx-auto w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 mb-3">
-          <ShieldCheck size={22} className="animate-pulse" />
+    <div className="w-full max-w-md p-8 rounded-2xl border border-primary/20 bg-zinc-950/80 backdrop-blur-xl shadow-[0_0_50px_rgba(0,102,255,0.15)] space-y-6 text-center">
+      <div className="space-y-3">
+        <div className="mx-auto w-14 h-14 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+          <ShieldCheck size={26} className="animate-pulse" />
         </div>
         <h2 className="text-2xl font-extrabold tracking-tight bg-gradient-to-b from-white via-zinc-200 to-zinc-500 bg-clip-text text-transparent">
-          Secure OTP Verification
+          Verify Your Email
         </h2>
-        <p className="text-xs text-muted-foreground px-2">
-          Verify authorization token sent to your contact address
+        <p className="text-xs text-muted-foreground px-2 leading-relaxed">
+          A secure verification link was sent to{' '}
+          {emailParam ? (
+            <span className="text-foreground font-semibold">{emailParam}</span>
+          ) : (
+            'your email address'
+          )}
+          . Click the link to activate your account.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-left">
-        {/* Email Address */}
-        <div className="space-y-1.5">
-          <label htmlFor="email" className="block text-xs font-semibold text-foreground">
-            Identity Email
-          </label>
-          <div className="relative">
-            <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <input
-              id="email"
-              type="email"
-              placeholder="e.g. rahul@email.com"
-              className={`w-full h-11 pl-10 pr-4 rounded-xl bg-black border ${
-                errors.email ? 'border-danger focus:ring-danger/25' : 'border-border focus:border-primary/50'
-              } text-sm focus:outline-none focus:ring-2 focus:ring-primary/25 transition-all placeholder:text-zinc-600`}
-              {...register('email')}
-              disabled={isLoading || !!emailParam}
-            />
-          </div>
-          {errors.email && (
-            <p className="text-[11px] text-danger flex items-center gap-1.5 mt-1 font-mono">
-              <ShieldAlert size={12} /> {errors.email.message}
-            </p>
-          )}
-        </div>
-
-        {/* OTP Code */}
-        <div className="space-y-1.5">
-          <label htmlFor="otp" className="block text-xs font-semibold text-foreground">
-            6-Digit Authorization Code
-          </label>
-          <div className="relative flex justify-center">
-            <input
-              id="otp"
-              type="text"
-              placeholder="123456"
-              maxLength={6}
-              className={`w-full h-12 text-center text-xl font-bold tracking-[0.6em] rounded-xl bg-black border ${
-                errors.otp ? 'border-danger focus:ring-danger/25' : 'border-border focus:border-primary/50'
-              } focus:outline-none focus:ring-2 focus:ring-primary/25 transition-all placeholder:text-zinc-800`}
-              {...register('otp')}
-              disabled={isLoading}
-            />
-          </div>
-          <p className="text-[10px] text-muted-foreground font-mono text-center pt-1">
-            Demo Secret Hint: Use mock code <span className="text-primary font-bold">123456</span>
+      {/* Steps */}
+      <div className="p-3 rounded-xl bg-zinc-900 border border-border text-xs text-muted-foreground space-y-2 text-left">
+        <p className="font-semibold text-foreground">Complete Verification:</p>
+        <div className="space-y-1.5 pl-1">
+          <p className="flex items-center gap-2">
+            <MailCheck size={12} className="text-primary shrink-0" />
+            Open the email from SafeClick
           </p>
-          {errors.otp && (
-            <p className="text-[11px] text-danger flex items-center justify-center gap-1.5 mt-1 font-mono">
-              <ShieldAlert size={12} /> {errors.otp.message}
-            </p>
-          )}
+          <p className="flex items-center gap-2">
+            <ShieldCheck size={12} className="text-primary shrink-0" />
+            Click the <span className="text-primary font-bold mx-0.5">Confirm Email</span> button
+          </p>
+          <p className="flex items-center gap-2">
+            <ArrowRight size={12} className="text-primary shrink-0" />
+            You will be redirected to your dashboard
+          </p>
         </div>
+      </div>
 
-        {/* Submit */}
-        <Button
-          type="submit"
-          className="w-full h-11 bg-primary text-primary-foreground font-bold shadow-[0_0_15px_rgba(0,102,255,0.4)] rounded-xl flex items-center justify-center gap-2 hover:bg-primary/90 transition-all pt-0 pb-0"
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <>
-              <Loader2 size={16} className="animate-spin" /> Verifying...
-            </>
-          ) : (
-            <>
-              Confirm Code & Authorize <ArrowRight size={16} />
-            </>
-          )}
-        </Button>
-      </form>
+      {/* Resend Option */}
+      {emailParam && (
+        <div className="space-y-2">
+          <p className="text-[11px] text-muted-foreground">
+            Did not receive the email? Check spam, or:
+          </p>
+          <Button
+            onClick={handleResendVerification}
+            disabled={isResending || resentCount >= 3}
+            variant="outline"
+            className="w-full h-10 border-border text-xs font-semibold hover:bg-zinc-900 transition-all"
+          >
+            {isResending ? (
+              <>
+                <Loader2 size={14} className="animate-spin mr-2" /> Resending...
+              </>
+            ) : (
+              <>
+                <RefreshCw size={14} className="mr-2" />
+                Resend Verification Email
+                {resentCount > 0 && ` (${resentCount}/3)`}
+              </>
+            )}
+          </Button>
+        </div>
+      )}
+
+      <Link
+        href="/login"
+        className="inline-flex items-center gap-1.5 text-xs text-primary font-bold hover:underline"
+      >
+        Back to Login <ArrowRight size={12} />
+      </Link>
     </div>
   );
 }

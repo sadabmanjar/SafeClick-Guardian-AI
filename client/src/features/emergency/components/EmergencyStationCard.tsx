@@ -41,24 +41,24 @@ export default function EmergencyStationCard() {
   const nearest = stations[0];
 
   return (
-    <div className="glass-card rounded-2xl border border-border flex flex-col h-full">
-      <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
-        <MapPin size={16} className="text-primary" />
-        <h3 className="text-sm font-bold text-foreground">Nearest Cyber Police Stations</h3>
+    <div className="bg-white border border-gray-200 shadow-xs flex flex-col h-full rounded-2xl">
+      <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-200">
+        <MapPin size={16} className="text-blue-600" />
+        <h3 className="text-sm font-bold text-gray-900">Nearest Cyber Police Stations</h3>
       </div>
 
       {/* Nearest station highlight */}
-      <div className="px-5 py-4 border-b border-border bg-primary/5">
+      <div className="px-5 py-4 border-b border-gray-200 bg-gray-50/50">
         <div className="flex items-center gap-2 mb-2">
-          <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-          <span className="text-[10px] font-bold text-success uppercase tracking-wide">Nearest — {nearest.distance} away</span>
+          <span className="w-2 h-2 rounded-full bg-green-600 animate-pulse" />
+          <span className="text-[10px] font-bold text-green-700 uppercase tracking-wide">Nearest — {nearest.distance} away</span>
         </div>
-        <p className="text-sm font-semibold text-foreground">{nearest.name}</p>
-        <p className="text-xs text-muted-foreground mt-1">{nearest.address}</p>
+        <p className="text-sm font-bold text-gray-900">{nearest.name}</p>
+        <p className="text-xs text-gray-500 mt-1 font-semibold">{nearest.address}</p>
         <div className="flex items-center gap-3 mt-3">
           <a
             href={`tel:${nearest.phone}`}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-success/15 border border-success/30 text-xs font-bold text-success hover:bg-success/25 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-green-50 border border-green-200 text-xs font-bold text-green-700 hover:bg-green-100 transition-colors"
           >
             <Phone size={12} />
             {nearest.phone}
@@ -66,6 +66,8 @@ export default function EmergencyStationCard() {
           <button
             onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(nearest.name + ' ' + nearest.address)}`, '_blank')}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary/15 border border-primary/30 text-xs font-bold text-primary hover:bg-primary/25 transition-colors"
+            onClick={() => toast.info('Navigation — connect to Leaflet/OpenStreetMap integration')}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-xs font-bold text-blue-600 hover:bg-blue-100 transition-colors"
           >
             <Navigation size={12} />
             Navigate
@@ -74,38 +76,38 @@ export default function EmergencyStationCard() {
       </div>
 
       {/* Other stations list */}
-      <div className="flex-1 overflow-y-auto scrollbar-cyber divide-y divide-border">
+      <div className="flex-1 overflow-y-auto scrollbar-cyber divide-y divide-gray-100">
         {stations.map((station) => (
           <div key={station.id}>
             <button
               onClick={() => setExpanded(expanded === station.id ? null : station.id)}
-              className="w-full flex items-start gap-3 px-5 py-3.5 hover:bg-muted/30 transition-colors text-left"
+              className="w-full flex items-start gap-3 px-5 py-3.5 hover:bg-gray-50/40 transition-colors text-left"
             >
-              <MapPin size={14} className="text-muted-foreground flex-shrink-0 mt-0.5" />
+              <MapPin size={14} className="text-gray-400 flex-shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-xs font-semibold text-foreground truncate">{station.name}</p>
-                  <span className="text-[10px] font-mono-data text-primary flex-shrink-0">{station.distance}</span>
+                  <p className="text-xs font-bold text-gray-900 truncate">{station.name}</p>
+                  <span className="text-[10px] font-bold font-mono text-blue-600 flex-shrink-0">{station.distance}</span>
                 </div>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <Clock size={10} className="text-muted-foreground" />
-                  <span className="text-[10px] text-muted-foreground">{station.hours}</span>
-                  <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${station.status === 'open' ? 'bg-success' : 'bg-danger'}`} />
+                  <Clock size={10} className="text-gray-400" />
+                  <span className="text-[10px] text-gray-400 font-semibold">{station.hours}</span>
+                  <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${station.status === 'open' ? 'bg-green-600' : 'bg-red-600'}`} />
                 </div>
               </div>
               {expanded === station.id ? (
-                <ChevronUp size={14} className="text-muted-foreground flex-shrink-0" />
+                <ChevronUp size={14} className="text-gray-400 flex-shrink-0" />
               ) : (
-                <ChevronDown size={14} className="text-muted-foreground flex-shrink-0" />
+                <ChevronDown size={14} className="text-gray-400 flex-shrink-0" />
               )}
             </button>
             {expanded === station.id && (
-              <div className="px-5 pb-3 bg-muted/20 float-up">
-                <p className="text-xs text-muted-foreground mb-2">{station.address}</p>
-                <p className="text-[10px] text-muted-foreground mb-2">Jurisdiction: {station.jurisdiction}</p>
+              <div className="px-5 pb-3 bg-gray-50/30 animate-in fade-in slide-in-from-top-1 duration-150">
+                <p className="text-xs text-gray-500 mb-2 font-semibold">{station.address}</p>
+                <p className="text-[10px] text-gray-400 mb-2 font-semibold">Jurisdiction: {station.jurisdiction}</p>
                 <a
                   href={`tel:${station.phone}`}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-success hover:underline"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-green-700 hover:underline"
                 >
                   <Phone size={11} />
                   {station.phone}

@@ -102,21 +102,21 @@ export default function EvidenceUploadZone({ onUploadSuccess }: EvidenceUploadZo
   return (
     <div
       {...getRootProps()}
-      className={`glass-card border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 ${
-        isDragActive ? 'border-primary bg-primary/5 scale-[0.99]' : 'border-border/60 hover:border-primary/45'
+      className={`bg-white border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-205 shadow-2xs ${
+        isDragActive ? 'border-blue-600 bg-blue-50/40 scale-[0.99]' : 'border-gray-200 hover:border-blue-500/40 hover:bg-gray-50/20'
       }`}
     >
       <input {...getInputProps()} />
-      <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-border/50 flex items-center justify-center text-muted-foreground mb-4">
-        <Upload size={22} className={isDragActive ? 'text-primary animate-bounce' : 'text-muted-foreground'} />
+      <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-400 mb-4">
+        <Upload size={20} className={isDragActive ? 'text-blue-600 animate-bounce' : 'text-gray-400'} />
       </div>
       
-      <h3 className="text-sm font-semibold text-foreground mb-1">Secure Upload Vault</h3>
-      <p className="text-xs text-muted-foreground max-w-xs mb-4 leading-normal">
+      <h3 className="text-sm font-bold text-gray-900 mb-1">Secure Upload Vault</h3>
+      <p className="text-xs text-gray-500 max-w-xs mb-4 leading-normal font-semibold">
         Drag & drop screenshot images, transaction PDFs, audio recordings, or videos here to calculate hash & secure
       </p>
 
-      <div className="flex items-center gap-4 text-[10px] font-mono text-muted-foreground">
+      <div className="flex items-center gap-4 text-[10px] font-semibold font-mono text-gray-400">
         <span className="flex items-center gap-1"><ImageIcon size={12} /> IMAGES</span>
         <span>•</span>
         <span className="flex items-center gap-1"><Video size={12} /> VIDEOS</span>
@@ -126,7 +126,7 @@ export default function EvidenceUploadZone({ onUploadSuccess }: EvidenceUploadZo
         <span className="flex items-center gap-1"><File size={12} /> PDFS</span>
       </div>
 
-      <div className="mt-4 inline-flex items-center gap-1.5 px-2.5 py-1 bg-success/15 border border-success/35 text-success rounded-full text-[9px] font-mono uppercase tracking-wider">
+      <div className="mt-4 inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 border border-green-200 text-green-700 rounded-full text-[9px] font-bold font-mono uppercase tracking-wider">
         <ShieldCheck size={11} /> Zero-Knowledge Client Hash (SHA-256) Enabled
       </div>
     </div>

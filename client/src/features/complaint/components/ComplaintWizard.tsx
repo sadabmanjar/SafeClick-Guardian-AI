@@ -103,10 +103,28 @@ export default function ComplaintWizard() {
 
     if (currentStep === 3) {
       setIsGenerating(true);
-      // TODO: Replace with POST /api/complaints/generate — Gemini API integration point
-      await new Promise((r) => setTimeout(r, 2200));
-      setGeneratedComplaint(buildComplaintText(watchedValues));
-      setIsGenerating(false);
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        const token = localStorage.getItem('token');
+        
+        const res = await fetch(`${apiUrl}/complaints/generate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify(watchedValues)
+        });
+
+        if (!res.ok) throw new Error('Generation failed');
+        const data = await res.json();
+        setGeneratedComplaint(data.data.complaintText);
+      } catch (e) {
+        console.error('API Error, falling back to mock text:', e);
+        setGeneratedComplaint(buildComplaintText(watchedValues));
+      } finally {
+        setIsGenerating(false);
+      }
     }
 
     setCurrentStep((prev) => Math.min(prev + 1, 4));

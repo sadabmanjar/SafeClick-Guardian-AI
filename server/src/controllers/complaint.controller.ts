@@ -1,6 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware';
 import Complaint from '../models/complaint.model';
+import { generateComplaintWithGemini } from '../services/gemini.service';
 
 export const createComplaint = async (
   req: AuthenticatedRequest,
@@ -20,6 +21,26 @@ export const createComplaint = async (
     res.status(201).json({
       status: 'success',
       data: newComplaint,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const generateComplaint = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const formData = req.body;
+    const generatedText = await generateComplaintWithGemini(formData);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        complaintText: generatedText,
+      },
     });
   } catch (error) {
     next(error);

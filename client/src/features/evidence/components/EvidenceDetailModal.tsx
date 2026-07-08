@@ -117,10 +117,18 @@ export default function EvidenceDetailModal({ item, onClose }: EvidenceDetailMod
         <div className="flex gap-3 pt-2">
           <Button
             onClick={() => {
-              toast.info('Downloading evidence media packet');
+              toast.info(`Preparing download for ${item.name}...`);
+              const content = `SAFECLICK SECURED DIGITAL EVIDENCE\n---------------------------------\nFile Name: ${item.name}\nSize: ${item.size}\nDate Secured: ${item.date}\nSHA-256 Integrity Hash: ${item.hash}\n\nAI OCR Text Extraction:\n----------------------\n${item.ocrText || 'No OCR extracted for this media category.'}`;
+              const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = `Evidence_Receipt_${item.name.replace(/\.[^/.]+$/, "")}.txt`;
+              link.click();
+              toast.success('Evidence packet downloaded!');
               onClose();
             }}
-            className="flex-1 h-11 bg-primary text-primary-foreground font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-primary/90 transition-all pt-0 pb-0"
+            className="flex-1 h-11 bg-blue-600 hover:bg-blue-750 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all pt-0 pb-0 shadow-sm"
           >
             <Download size={15} /> Download Packet
           </Button>

@@ -135,18 +135,41 @@ export default function AnalyzerInputPanel() {
 
     setIsAnalyzing(true);
 
-    // Simulate AI analysis delay — backend integration point
-    await new Promise((r) => setTimeout(r, 1800));
-
-    // Determine mock result based on input content
     let result: AnalysisResult;
-    const lowerInput = inputText.toLowerCase();
-    if (lowerInput.includes('otp') || lowerInput.includes('click') || lowerInput.includes('reward') || lowerInput.includes('cashback') || uploadedFile) {
-      result = mockResults.high;
-    } else if (lowerInput.includes('job') || lowerInput.includes('salary') || lowerInput.includes('work from home')) {
-      result = mockResults.medium;
-    } else {
-      result = mockResults.safe;
+    try {
+      // Real backend integration point
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+      const token = localStorage.getItem('token');
+      
+      const res = await fetch(`${apiUrl}/scan`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          content: activeTab === 'screenshot' || activeTab === 'qr' ? 'image-upload-simulated' : inputText,
+          contentType: activeTab === 'url' ? 'url' : activeTab === 'email' ? 'text' : activeTab === 'sms' ? 'text' : 'image'
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error('API Request Failed');
+      }
+
+      const data = await res.json();
+      result = data.data; // The server returns { status: 'success', data: newScan }
+    } catch (e) {
+      console.error('API Error, falling back to mock results:', e);
+      // Fallback if backend is unreachable
+      const lowerInput = inputText.toLowerCase();
+      if (lowerInput.includes('otp') || lowerInput.includes('click') || lowerInput.includes('reward') || uploadedFile) {
+        result = mockResults.high;
+      } else if (lowerInput.includes('job') || lowerInput.includes('salary')) {
+        result = mockResults.medium;
+      } else {
+        result = mockResults.safe;
+      }
     }
 
     setIsAnalyzing(false);

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { ArrowRight, Clock, CheckCircle, Eye, Loader2, FileText } from 'lucide-react';
+import { ArrowRight, Eye, Loader2, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { useComplaintHistory } from '@/hooks/useComplaint';
 
@@ -13,14 +13,14 @@ export default function RecentComplaintsList() {
   }, [fetchHistory]);
 
   return (
-    <div className="glass-card rounded-xl border border-border p-5 flex flex-col justify-between h-full">
+    <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col justify-between h-full shadow-sm">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Legal Ledger</h3>
-            <p className="text-sm text-foreground font-semibold mt-0.5">Filed Police Complaints</p>
+            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Legal Ledger</h3>
+            <p className="text-sm text-gray-900 font-semibold mt-0.5">Filed Police Complaints</p>
           </div>
-          <Link href="/complaint-generator" className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1">
+          <Link href="/complaint" className="text-[10px] font-bold text-blue-600 hover:underline flex items-center gap-1">
             View All Ledger <ArrowRight size={10} />
           </Link>
         </div>
@@ -40,7 +40,7 @@ export default function RecentComplaintsList() {
               <div key={comp._id || `comp-${idx}`} className="p-3 bg-zinc-950/40 border border-border/50 rounded-lg flex items-center justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-mono-data font-bold text-foreground">
+                    <span className="text-[10px] font-mono font-bold text-foreground">
                       {comp._id.substring(0, 12)}
                     </span>
                     <span className="text-[10px] text-muted-foreground font-mono">
@@ -67,3 +67,4 @@ export default function RecentComplaintsList() {
     </div>
   );
 }
+

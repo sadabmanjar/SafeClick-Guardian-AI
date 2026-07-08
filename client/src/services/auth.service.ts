@@ -12,9 +12,11 @@ import { LoginInput, SignupInput, ForgotPasswordInput } from '@/features/auth/sc
 
 export const authService = {
   /**
+
    * Sign up a new user via Supabase.
    * Inserts a profile row with default role = 'citizen'.
    * Supabase sends a real email verification link.
+
    */
   async signUp(data: SignupInput): Promise<{ message: string; email: string }> {
     const { data: authData, error } = await supabase.auth.signUp({

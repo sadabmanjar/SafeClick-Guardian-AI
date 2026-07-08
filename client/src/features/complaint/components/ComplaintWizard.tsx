@@ -20,7 +20,6 @@ import StepEvidence from './StepEvidence';
 import StepReviewExport from './StepReviewExport';
 
 export interface ComplaintFormData {
-  // Step 1 — Incident
   incidentDate: string;
   incidentTime: string;
   platform: string;
@@ -29,7 +28,6 @@ export interface ComplaintFormData {
   suspectEmail: string;
   suspectAccountNo: string;
   description: string;
-  // Step 2 — Financial
   amountLost: string;
   transactionId: string;
   transactionDate: string;
@@ -37,10 +35,8 @@ export interface ComplaintFormData {
   accountNumber: string;
   upiId: string;
   paymentMode: string;
-  // Step 3 — Evidence
   evidenceDescription: string;
   ncrpComplaintNo: string;
-  // Step 4 — Personal
   complainantName: string;
   complainantPhone: string;
   complainantEmail: string;
@@ -49,11 +45,18 @@ export interface ComplaintFormData {
 }
 
 const steps = [
-  { id: 1, label: 'Incident Details', icon: Calendar, description: 'When and how it happened' },
-  { id: 2, label: 'Financial Loss', icon: CreditCard, description: 'Transaction and payment details' },
-  { id: 3, label: 'Evidence', icon: Paperclip, description: 'Attach proof and documents' },
-  { id: 4, label: 'Review & Export', icon: FileCheck, description: 'Preview and download complaint' },
+  { id: 1, label: 'Incident Details',  icon: Calendar,  description: 'When & how it happened',         color: 'blue' },
+  { id: 2, label: 'Financial Loss',    icon: CreditCard, description: 'Transaction & payment details',  color: 'orange' },
+  { id: 3, label: 'Evidence',          icon: Paperclip,  description: 'Attach proof & documents',       color: 'purple' },
+  { id: 4, label: 'Review & Export',   icon: FileCheck,  description: 'Preview & download complaint',   color: 'green' },
 ];
+
+const stepColors: Record<string, { ring: string; bg: string; text: string; activeBg: string }> = {
+  blue:   { ring: 'ring-blue-500',   bg: 'bg-blue-600',   text: 'text-blue-600',   activeBg: 'bg-blue-50 border-blue-200' },
+  orange: { ring: 'ring-orange-500', bg: 'bg-orange-500', text: 'text-orange-600', activeBg: 'bg-orange-50 border-orange-200' },
+  purple: { ring: 'ring-purple-500', bg: 'bg-purple-600', text: 'text-purple-600', activeBg: 'bg-purple-50 border-purple-200' },
+  green:  { ring: 'ring-green-500',  bg: 'bg-green-600',  text: 'text-green-600',  activeBg: 'bg-green-50 border-green-200' },
+};
 
 export default function ComplaintWizard() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -62,28 +65,13 @@ export default function ComplaintWizard() {
 
   const form = useForm<ComplaintFormData>({
     defaultValues: {
-      incidentDate: '',
-      incidentTime: '',
-      platform: '',
-      fraudType: '',
-      suspectPhone: '',
-      suspectEmail: '',
-      suspectAccountNo: '',
-      description: '',
-      amountLost: '',
-      transactionId: '',
-      transactionDate: '',
-      bankName: '',
-      accountNumber: '',
-      upiId: '',
-      paymentMode: '',
-      evidenceDescription: '',
-      ncrpComplaintNo: '',
-      complainantName: '',
-      complainantPhone: '',
-      complainantEmail: '',
-      complainantAddress: '',
-      complainantAadhaarLast4: '',
+      incidentDate: '', incidentTime: '', platform: '', fraudType: '',
+      suspectPhone: '', suspectEmail: '', suspectAccountNo: '', description: '',
+      amountLost: '', transactionId: '', transactionDate: '', bankName: '',
+      accountNumber: '', upiId: '', paymentMode: '',
+      evidenceDescription: '', ncrpComplaintNo: '',
+      complainantName: '', complainantPhone: '', complainantEmail: '',
+      complainantAddress: '', complainantAadhaarLast4: '',
     },
     mode: 'onBlur',
   });
@@ -96,13 +84,11 @@ export default function ComplaintWizard() {
       2: ['amountLost', 'transactionId', 'bankName', 'paymentMode'],
       3: ['evidenceDescription'],
     };
-
     const fields = fieldsToValidate[currentStep];
     if (fields) {
       const valid = await form.trigger(fields);
       if (!valid) return;
     }
-
     if (currentStep === 3) {
       const payload: CreateComplaintRequest = {
         category: watchedValues.fraudType || 'Financial Fraud',
@@ -133,83 +119,89 @@ export default function ComplaintWizard() {
         return; // Stop if failed
       }
     }
-
     setCurrentStep((prev) => Math.min(prev + 1, 4));
   };
 
-  const handleBack = () => {
-    setCurrentStep((prev) => Math.max(prev - 1, 1));
-  };
+  const handleBack = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
+
+  const activeStep = steps[currentStep - 1];
+  const activeColor = stepColors[activeStep.color];
+  const progressPct = ((currentStep - 1) / (steps.length - 1)) * 100;
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
-      {/* Main wizard panel */}
-      <div className="xl:col-span-3 space-y-6">
-        {/* Step progress */}
-        <div className="glass-card rounded-xl border border-border p-5">
+      {/* ── Main Wizard ── */}
+      <div className="xl:col-span-3 space-y-5">
+
+        {/* Step Tracker */}
+        <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+          {/* Header */}
           <div className="flex items-center justify-between mb-4">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-              Step {currentStep} of {steps.length}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {Math.round(((currentStep - 1) / (steps.length - 1)) * 100)}% complete
-            </p>
+            <div>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Progress</p>
+              <p className="text-sm font-bold text-gray-800 mt-0.5">
+                Step {currentStep} of {steps.length} — {activeStep.label}
+              </p>
+            </div>
+            <span className={`text-xs font-black px-3 py-1 rounded-full border ${activeColor.activeBg} ${activeColor.text}`}>
+              {Math.round(progressPct)}% done
+            </span>
           </div>
 
           {/* Progress bar */}
-          <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-6">
+          <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-5">
             <div
-              className="h-full bg-primary rounded-full transition-all duration-500"
-              style={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
+              className={`h-full rounded-full transition-all duration-500 ${activeColor.bg}`}
+              style={{ width: `${progressPct || 4}%` }}
             />
           </div>
 
-          {/* Step indicators */}
-          <div className="flex items-center justify-between">
-            {steps.map((step, idx) => {
+          {/* Step pills */}
+          <div className="flex items-start gap-2">
+            {steps.map((step) => {
               const isCompleted = currentStep > step.id;
-              const isActive = currentStep === step.id;
+              const isActive    = currentStep === step.id;
+              const c = stepColors[step.color];
               return (
-                <div key={`step-indicator-${step.id}`} className="flex flex-col items-center gap-1.5 flex-1">
-                  <button
-                    onClick={() => isCompleted && setCurrentStep(step.id)}
-                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ${
-                      isCompleted
-                        ? 'bg-success border-2 border-success cursor-pointer hover:scale-105'
-                        : isActive
-                        ? 'bg-primary/20 border-2 border-primary neon-glow-primary' :'bg-muted border-2 border-border cursor-default'
-                    }`}
-                    disabled={!isCompleted}
-                    aria-label={`Go to step ${step.id}: ${step.label}`}
-                  >
-                    {isCompleted ? (
-                      <Check size={14} className="text-background" />
-                    ) : (
-                      <step.icon size={14} className={isActive ? 'text-primary' : 'text-muted-foreground'} />
-                    )}
-                  </button>
-                  <div className="text-center hidden sm:block">
-                    <p className={`text-[10px] font-semibold ${isActive ? 'text-primary' : isCompleted ? 'text-success' : 'text-muted-foreground'}`}>
-                      {step.label}
-                    </p>
-                    <p className="text-[9px] text-muted-foreground hidden md:block">{step.description}</p>
+                <button
+                  key={`step-${step.id}`}
+                  onClick={() => isCompleted && setCurrentStep(step.id)}
+                  disabled={!isCompleted}
+                  className={`flex-1 flex flex-col items-center gap-1.5 p-2 rounded-xl border transition-all duration-200 text-center ${
+                    isCompleted
+                      ? `${c.activeBg} cursor-pointer hover:opacity-80`
+                      : isActive
+                      ? `${c.activeBg} ring-2 ${c.ring}`
+                      : 'bg-gray-50 border-gray-200 cursor-default opacity-50'
+                  }`}
+                >
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    isCompleted ? c.bg : isActive ? c.bg : 'bg-gray-200'
+                  }`}>
+                    {isCompleted
+                      ? <Check size={14} className="text-white" />
+                      : <step.icon size={14} className="text-white" />
+                    }
                   </div>
-                  {idx < steps.length - 1 && (
-                    <div className={`hidden sm:block absolute`} />
-                  )}
-                </div>
+                  <p className={`text-[10px] font-bold leading-tight hidden sm:block ${
+                    isActive ? c.text : isCompleted ? 'text-gray-600' : 'text-gray-400'
+                  }`}>{step.label}</p>
+                </button>
               );
             })}
           </div>
         </div>
 
-        {/* Step content */}
-        <div className="glass-card rounded-xl border border-border overflow-hidden">
-          <div className="px-6 py-4 border-b border-border flex items-center gap-3">
-            {React.createElement(steps[currentStep - 1].icon, { size: 16, className: 'text-primary' })}
+        {/* Step Content Card */}
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+          {/* Step header */}
+          <div className={`px-6 py-4 border-b border-gray-100 flex items-center gap-3 ${activeColor.activeBg}`}>
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${activeColor.bg}`}>
+              {React.createElement(activeStep.icon, { size: 16, className: 'text-white' })}
+            </div>
             <div>
-              <h3 className="text-sm font-bold text-foreground">{steps[currentStep - 1].label}</h3>
-              <p className="text-xs text-muted-foreground">{steps[currentStep - 1].description}</p>
+              <h3 className="text-sm font-bold text-gray-900">{activeStep.label}</h3>
+              <p className="text-xs text-gray-500">{activeStep.description}</p>
             </div>
           </div>
 
@@ -220,45 +212,41 @@ export default function ComplaintWizard() {
             {currentStep === 4 && <StepReviewExport form={form} generatedComplaint={generatedComplaint} />}
           </div>
 
-          {/* Navigation buttons */}
-          <div className="px-6 py-4 border-t border-border flex items-center justify-between">
+          {/* Navigation */}
+          <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
             <button
               onClick={handleBack}
               disabled={currentStep === 1}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 active:scale-95 ${
-                currentStep === 1
-                  ? 'opacity-40 cursor-not-allowed text-muted-foreground border border-border'
-                  : 'text-foreground border border-border hover:bg-muted'
-              }`}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-600 border border-gray-200 bg-white hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
             >
-              <ChevronLeft size={15} />
-              Back
+              <ChevronLeft size={15} /> Previous
             </button>
 
             {currentStep < 4 && (
               <button
                 onClick={handleNext}
                 disabled={isGenerating}
-                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-150 active:scale-95 ${
-                  isGenerating
-                    ? 'bg-primary/50 text-primary-foreground cursor-not-allowed'
-                    : 'bg-primary text-primary-foreground hover:bg-primary/90 neon-glow-primary'
-                }`}
+                className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold text-white transition-all active:scale-95 shadow-sm ${
+                  isGenerating ? 'opacity-60 cursor-not-allowed' : ''
+                } ${activeColor.bg} hover:opacity-90`}
               >
-                {isGenerating ? (
-                  <><Loader2 size={15} className="animate-spin" /> Generating Complaint...</>
-                ) : (
-                  <>{currentStep === 3 ? 'Generate Complaint' : 'Continue'}<ChevronRight size={15} /></>
-                )}
+                {isGenerating
+                  ? <><Loader2 size={15} className="animate-spin" /> Generating...</>
+                  : <>{currentStep === 3 ? 'Generate Complaint' : 'Continue'}<ChevronRight size={15} /></>
+                }
               </button>
             )}
           </div>
         </div>
       </div>
 
-      {/* Preview panel */}
+      {/* ── Preview Panel ── */}
       <div className="xl:col-span-2">
-        <ComplaintPreviewPanel formData={watchedValues} generatedComplaint={generatedComplaint} currentStep={currentStep} />
+        <ComplaintPreviewPanel
+          formData={watchedValues}
+          generatedComplaint={generatedComplaint}
+          currentStep={currentStep}
+        />
       </div>
     </div>
   );

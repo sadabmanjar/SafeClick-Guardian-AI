@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { INotification } from '../../types';
+import { INotification } from '../types';
 import { getTypeStyles, PriorityBadge } from './NotificationBadge';
 import { formatDistanceToNow } from 'date-fns';
 import { Bell, CheckCircle2, AlertTriangle, XCircle, Info, ShieldAlert, Cpu, FileWarning, Crown, Trash2, Check, ExternalLink } from 'lucide-react';

@@ -70,8 +70,7 @@ const ComplaintSchema: Schema = new Schema({
   timestamps: true,
 });
 
-// Auto-generate complaint ID before validation
-ComplaintSchema.pre('validate', function (next) {
+ComplaintSchema.pre('validate', function (this: any, next: any) {
   if (!this.complaintId) {
     // format: CMP-YYYY-XXXXXX
     const year = new Date().getFullYear();

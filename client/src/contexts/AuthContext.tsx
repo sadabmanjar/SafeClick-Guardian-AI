@@ -189,6 +189,9 @@ export function useAuthContext(): AuthContextType {
   return context;
 }
 
+export const useAuth = useAuthContext;
+
+
 /**
  * Maps Supabase AuthError codes to user-friendly messages.
  */
@@ -219,3 +222,4 @@ function mapAuthError(error: AuthError): Error {
 
   return new Error(error.message || 'An unexpected error occurred. Please try again.');
 }
+

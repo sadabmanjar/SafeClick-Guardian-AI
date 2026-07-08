@@ -27,60 +27,60 @@ export default function EvidenceDetailModal({ item, onClose }: EvidenceDetailMod
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-2xl border border-primary/20 bg-zinc-950 p-6 space-y-6 shadow-[0_0_50px_rgba(0,102,255,0.2)] float-up">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/35 backdrop-blur-xs">
+      <div className="w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-6 space-y-6 shadow-xl relative animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-border/50 pb-4">
+        <div className="flex items-start justify-between border-b border-gray-100 pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-zinc-900 border border-border/50 flex items-center justify-center text-primary">
+            <div className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
               <FileText size={18} />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-foreground truncate max-w-[280px]">{item.name}</h3>
-              <p className="text-[10px] text-muted-foreground mt-0.5 uppercase tracking-wider">{item.type} File</p>
+              <h3 className="text-sm font-bold text-gray-900 truncate max-w-[280px]">{item.name}</h3>
+              <p className="text-[10px] text-gray-400 mt-0.5 uppercase tracking-wider font-semibold font-mono">{item.type} File</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+            className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-900 transition-colors"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Info Grid */}
-        <div className="grid grid-cols-2 gap-4 text-xs">
-          <div className="p-3 bg-zinc-900/40 border border-border/50 rounded-xl space-y-1">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
+        <div className="grid grid-cols-2 gap-4 text-xs font-semibold">
+          <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-1">
+            <span className="text-[10px] font-bold text-gray-400 uppercase flex items-center gap-1">
               <Calendar size={10} /> Date Secured
             </span>
-            <p className="text-foreground font-semibold">{item.date}</p>
+            <p className="text-gray-900 font-bold">{item.date}</p>
           </div>
-          <div className="p-3 bg-zinc-900/40 border border-border/50 rounded-xl space-y-1">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
+          <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-1">
+            <span className="text-[10px] font-bold text-gray-400 uppercase flex items-center gap-1">
               <Lock size={10} /> Size
             </span>
-            <p className="text-foreground font-semibold">{item.size}</p>
+            <p className="text-gray-900 font-bold">{item.size}</p>
           </div>
         </div>
 
         {/* Cryptographic Integrity Section */}
-        <div className="p-4 bg-success/5 border border-success/20 rounded-xl space-y-3">
+        <div className="p-4 bg-green-50 border border-green-200 rounded-xl space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-success uppercase tracking-wider flex items-center gap-1.5">
+            <span className="text-[10px] font-bold text-green-700 uppercase tracking-wider flex items-center gap-1.5 font-mono">
               <ShieldCheck size={12} /> Crypto Hash Integrity (SHA-256)
             </span>
             <button
               onClick={handleCopyHash}
-              className="inline-flex items-center gap-1 text-[9px] font-bold text-success hover:underline"
+              className="inline-flex items-center gap-1 text-[9px] font-bold text-green-700 hover:underline"
             >
               <Copy size={9} /> Copy Hash
             </button>
           </div>
-          <p className="text-[10px] font-mono text-muted-foreground break-all leading-normal">
+          <p className="text-[10px] font-mono text-green-800 break-all leading-normal font-semibold">
             {item.hash}
           </p>
-          <div className="text-[9px] text-success/80 font-mono">
+          <div className="text-[9px] text-green-700/80 font-semibold font-mono">
             Verified unchanged since upload. Chain-of-custody log entry created.
           </div>
         </div>
@@ -88,25 +88,25 @@ export default function EvidenceDetailModal({ item, onClose }: EvidenceDetailMod
         {/* OCR Extractions (if any) */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
               AI OCR Text Extraction
             </span>
             {item.ocrText && (
               <button
                 onClick={handleCopyOcr}
-                className="inline-flex items-center gap-1 text-[9px] font-bold text-primary hover:underline"
+                className="inline-flex items-center gap-1 text-[9px] font-bold text-blue-600 hover:underline"
               >
                 <Copy size={9} /> Copy Text
               </button>
             )}
           </div>
-          <div className="p-3 bg-black border border-border/50 rounded-xl max-h-[140px] overflow-y-auto scrollbar-cyber">
+          <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl max-h-[140px] overflow-y-auto scrollbar-cyber">
             {item.ocrText ? (
-              <p className="text-xs text-foreground font-mono leading-relaxed whitespace-pre-wrap">
+              <p className="text-xs text-gray-800 font-mono leading-relaxed whitespace-pre-wrap font-semibold">
                 {item.ocrText}
               </p>
             ) : (
-              <p className="text-xs text-muted-foreground italic text-center py-4">
+              <p className="text-xs text-gray-400 italic text-center py-4 font-semibold">
                 No OCR extractions available for this media category.
               </p>
             )}
@@ -120,7 +120,7 @@ export default function EvidenceDetailModal({ item, onClose }: EvidenceDetailMod
               toast.info('Downloading evidence media packet');
               onClose();
             }}
-            className="flex-1 h-11 bg-primary text-primary-foreground font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-primary/90 transition-all pt-0 pb-0"
+            className="flex-1 h-11 bg-blue-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-blue-700 transition-all pt-0 pb-0 shadow-sm"
           >
             <Download size={15} /> Download Packet
           </Button>

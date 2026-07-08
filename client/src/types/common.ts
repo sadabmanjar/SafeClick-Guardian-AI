@@ -68,8 +68,10 @@ export interface SuspectDetails {
   upiId?: string;
   bankAccount?: string;
   websiteUrl?: string;
+  email?: string;
   otherDetails?: string;
 }
+
 
 export interface Complaint {
   _id: string;

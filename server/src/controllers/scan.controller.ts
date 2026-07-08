@@ -54,7 +54,7 @@ export const getScanById = async (
     const { id } = req.params;
     const userId = req.user?.userId;
 
-    const scan = await getScan(id, userId);
+    const scan = await getScan(id as string, userId);
     sendSuccess(res, 200, 'Scan retrieved successfully', scan);
   } catch (error) {
     next(error);
@@ -70,7 +70,7 @@ export const deleteScan = async (
     const { id } = req.params;
     const userId = req.user?.userId;
 
-    await deleteScanById(id, userId);
+    await deleteScanById(id as string, userId);
     sendSuccess(res, 200, 'Threat scan entry successfully deleted', null);
   } catch (error) {
     next(error);

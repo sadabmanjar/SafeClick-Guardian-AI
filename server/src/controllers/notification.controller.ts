@@ -48,7 +48,7 @@ export const markAsRead = async (req: AuthenticatedRequest, res: Response, next:
     const { id } = req.params;
     if (!userId) throw new Error('User ID required');
 
-    const notification = await notificationService.markAsRead(id, userId);
+    const notification = await notificationService.markAsRead(id as string, userId);
     sendSuccess(res, 200, 'Notification marked as read', notification);
   } catch (error) {
     next(error);
@@ -73,7 +73,7 @@ export const deleteNotification = async (req: AuthenticatedRequest, res: Respons
     const { id } = req.params;
     if (!userId) throw new Error('User ID required');
 
-    await notificationService.deleteNotification(id, userId);
+    await notificationService.deleteNotification(id as string, userId);
     sendSuccess(res, 200, 'Notification deleted', null);
   } catch (error) {
     next(error);

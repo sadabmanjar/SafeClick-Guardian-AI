@@ -47,7 +47,7 @@ export const getComplaintById = async (
     const userId = req.user?.userId;
     const { id } = req.params;
 
-    const complaint = await getComplaint(id, userId);
+    const complaint = await getComplaint(id as string, userId);
     sendSuccess(res, 200, 'Complaint retrieved successfully', complaint);
   } catch (error) {
     next(error);

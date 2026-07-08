@@ -14,17 +14,17 @@ import {
 } from 'lucide-react';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { toast } from 'sonner';
-import type { AnalysisResult } from './AnalyzerInputPanel';
+import { ScanResult } from '@/types/common';
 
 const RiskGaugeChart = dynamic(() => import('./RiskGaugeChart'), { ssr: false });
 
 export default function AnalyzerResultPanel() {
-  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [result, setResult] = useState<ScanResult | null>(null);
   const [activeSection, setActiveSection] = useState<'overview' | 'tricks' | 'flags' | 'actions'>('overview');
 
   useEffect(() => {
     const handler = (e: Event) => {
-      const custom = e as CustomEvent<AnalysisResult | null>;
+      const custom = e as CustomEvent<ScanResult | null>;
       setResult(custom.detail);
       setActiveSection('overview');
     };
@@ -66,7 +66,7 @@ export default function AnalyzerResultPanel() {
 
   const handleCopyReport = () => {
     const report = `SafeClick Guardian AI — Scam Analysis Report
-Analysis ID: ${result.analysisId}
+Analysis ID: ${result._id}
 Risk Score: ${result.riskScore}/100 (${result.riskLevel.toUpperCase()})
 Scam Type: ${result.scamType}
 AI Confidence: ${result.confidence}%
@@ -83,7 +83,7 @@ Recommended Actions: ${result.recommendedActions.join(' | ')}`;
     const content = `==================================================
 SAFECLICK GUARDIAN AI - INCIDENT REPORT
 ==================================================
-Analysis ID: ${result.analysisId}
+Analysis ID: ${result._id}
 Scam Category: ${result.scamType}
 Risk Assessment: ${result.riskScore}/100 (${result.riskLevel.toUpperCase()})
 AI Confidence Score: ${result.confidence}%
@@ -108,7 +108,8 @@ SafeClick Security National Hackathon Project
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `safeclick-report-${result.analysisId}.txt`;
+
+    link.download = `safeclick-report-${result._id}.pdf`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -132,8 +133,10 @@ SafeClick Security National Hackathon Project
               dot
             />
           </div>
-          <p className="text-xs text-gray-400 mt-0.5 font-medium">
-            {result.scamType} · Ref: <span className="font-mono">{result.analysisId}</span>
+
+          <p className="text-sm text-muted-foreground mt-0.5 truncate">
+            {result.scamType} · ID: <span className="font-mono-data text-xs">{result._id}</span>
+
           </p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -237,8 +240,9 @@ SafeClick Security National Hackathon Project
             ) : (
               result.psychologicalTricks.map((trick, i) => (
                 <div
-                  key={`trick-${result.analysisId}-${i}`}
-                  className="flex items-start gap-3 p-3 rounded-lg bg-amber-50/50 border border-amber-100"
+
+                  key={`trick-${result._id}-${i}`}
+                  className="flex items-start gap-3 p-3 rounded-lg bg-warning/5 border border-warning/15"
                 >
                   <div className="w-5 h-5 rounded-full bg-amber-100 border border-amber-200 flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-amber-700 mt-0.5">
                     {i + 1}
@@ -260,8 +264,10 @@ SafeClick Security National Hackathon Project
             ) : (
               result.redFlags.map((flag, i) => (
                 <div
-                  key={`flag-${result.analysisId}-${i}`}
-                  className="flex items-start gap-3 p-3 rounded-lg bg-red-50/50 border border-red-100"
+
+                  key={`flag-${result._id}-${i}`}
+                  className="flex items-start gap-3 p-3 rounded-lg bg-danger/5 border border-danger/15"
+
                 >
                   <Flag size={13} className="text-red-600 flex-shrink-0 mt-0.5" />
                   <p className="text-xs text-gray-750 font-medium leading-relaxed">{flag}</p>
@@ -276,8 +282,9 @@ SafeClick Security National Hackathon Project
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">Security Recommendations</p>
             {result.recommendedActions.map((action, i) => (
               <div
-                key={`action-${result.analysisId}-${i}`}
-                className="flex items-start gap-3 p-3 rounded-lg bg-blue-50/30 border border-blue-100 hover:bg-blue-50 transition-colors"
+
+                key={`action-${result._id}-${i}`}
+                className="flex items-start gap-3 p-3 rounded-lg bg-primary/5 border border-primary/15 hover:border-primary/30 transition-colors cursor-default"
               >
                 <div className="w-5 h-5 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-blue-600 mt-0.5">
                   {i + 1}

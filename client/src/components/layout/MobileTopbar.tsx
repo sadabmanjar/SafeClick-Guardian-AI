@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Menu, Shield, AlertTriangle, FileText, MapPin, GraduationCap, BarChart3, Database, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
 import AppLogo from '@/components/ui/AppLogo';
+import { NotificationBell } from '@/features/notifications/components/NotificationBell';
 
 interface MobileTopbarProps {
   activeRoute: string;
@@ -109,6 +110,10 @@ export default function MobileTopbar({ activeRoute }: MobileTopbarProps) {
             SafeClick
           </span>
         </div>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <NotificationBell />
       </div>
     </header>
   );

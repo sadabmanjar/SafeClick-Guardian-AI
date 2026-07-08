@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { Users, Bell, Plus, CheckCircle, Phone } from 'lucide-react';
+import { useEmergency } from '@/hooks/useEmergency';
 import { toast } from 'sonner';
 
 const contacts = [
@@ -32,26 +33,38 @@ const contacts = [
 
 export default function TrustedContactsPanel() {
   const [contactList, setContactList] = useState(contacts);
-  const [notifyingAll, setNotifyingAll] = useState(false);
+  const [notifyingId, setNotifyingId] = useState<string | null>(null);
+  const { triggerAlert, isLoading: isTriggering } = useEmergency();
 
-  const handleNotify = (id: string) => {
-    setContactList((prev) =>
-      prev.map((c) => c.id === id ? { ...c, notified: true } : c)
-    );
+  const handleNotify = async (id: string) => {
     const contact = contactList.find((c) => c.id === id);
-    toast.success(`Alert sent to ${contact?.name}`, {
-      description: 'They have been notified of the cyber fraud incident',
+    if (!contact) return;
+    
+    setNotifyingId(id);
+    const result = await triggerAlert({
+      alertType: 'MANUAL_TRIGGER',
+      contactsNotified: [contact.phone],
     });
+    setNotifyingId(null);
+
+    if (result) {
+      setContactList((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, notified: true } : c))
+      );
+    }
   };
 
   const handleNotifyAll = async () => {
-    setNotifyingAll(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setContactList((prev) => prev.map((c) => ({ ...c, notified: true })));
-    setNotifyingAll(false);
-    toast.success('All trusted contacts notified', {
-      description: `${contacts.length} people have been alerted about your situation`,
+    setNotifyingId('all');
+    const result = await triggerAlert({
+      alertType: 'MANUAL_TRIGGER',
+      contactsNotified: contactList.filter(c => !c.notified).map(c => c.phone),
     });
+    setNotifyingId(null);
+
+    if (result) {
+      setContactList((prev) => prev.map((c) => ({ ...c, notified: true })));
+    }
   };
 
   return (
@@ -96,10 +109,16 @@ export default function TrustedContactsPanel() {
                 </a>
                 <button
                   onClick={() => handleNotify(contact.id)}
-                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-50 border border-amber-200 text-[10px] font-bold text-amber-600 hover:bg-amber-100/50 transition-colors"
+
+                  disabled={notifyingId === contact.id || isTriggering}
+                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-colors ${
+                    notifyingId === contact.id
+                      ? 'bg-warning/30 text-warning cursor-not-allowed'
+                      : 'bg-warning/15 border border-warning/30 text-warning hover:bg-warning/25'
+                  }`}
                 >
                   <Bell size={11} />
-                  Alert
+                  {notifyingId === contact.id ? 'Alerting...' : 'Alert'}
                 </button>
               </div>
             )}
@@ -110,18 +129,20 @@ export default function TrustedContactsPanel() {
       <div className="border-t border-gray-100 px-5 py-3">
         <button
           onClick={handleNotifyAll}
-          disabled={notifyingAll || contactList.every((c) => c.notified)}
+          disabled={notifyingId === 'all' || contactList.every((c) => c.notified)}
           className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-150 active:scale-95 ${
             contactList.every((c) => c.notified)
-              ? 'bg-green-50 text-green-700 border border-green-200 cursor-default'
-              : notifyingAll
-              ? 'bg-amber-100 text-amber-600 cursor-not-allowed' : 'bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100/50'
+
+              ? 'bg-success/15 text-success border border-success/30 cursor-default'
+              : notifyingId === 'all'
+              ? 'bg-warning/30 text-warning cursor-not-allowed' :'bg-warning/15 text-warning border border-warning/30 hover:bg-warning/25'
+
           }`}
         >
           {contactList.every((c) => c.notified) ? (
             <><CheckCircle size={15} /> All contacts notified</>
-          ) : notifyingAll ? (
-            <><span className="w-3 h-3 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" /> Notifying...</>
+          ) : notifyingId === 'all' ? (
+            <><span className="w-3 h-3 rounded-full border-2 border-warning border-t-transparent animate-spin" /> Notifying...</>
           ) : (
             <><Bell size={15} /> Notify All Contacts</>
           )}

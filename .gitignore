@@ -79,3 +79,8 @@ temp/
 # ==========================
 .vercel/
 .turbo/
+
+
+.package.json/
+.package-lock.json/
+

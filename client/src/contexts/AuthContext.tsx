@@ -1,183 +1,225 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
-import { authService } from '@/services/auth.service';
-import { LoginInput, SignupInput } from '@/features/auth/schemas/auth.schema';
-import { toast } from 'sonner';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { Session, User, AuthError } from '@supabase/supabase-js';
+import { useRouter } from 'next/navigation';
+import { supabase, Profile, UserRole } from '@/lib/supabase';
 
-interface AuthContextType {
-  user: any;
-  loading: boolean;
-  signIn: (data: LoginInput) => Promise<void>;
-  signUp: (data: SignupInput) => Promise<void>;
+export interface AuthContextType {
+  user: User | null;
+  session: Session | null;
+  profile: Profile | null;
+  role: UserRole | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  isEmailVerified: boolean;
+  signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Helper to detect if Supabase is using placeholder credentials
-const isPlaceholderSupabase = () => {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  return !url || !key || url.includes('placeholder') || key.includes('placeholder');
-};
+const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Sync cookie with auth session state for Next.js Edge Middleware route-guarding
-  const syncCookie = (sessionActive: boolean) => {
-    if (typeof document !== 'undefined') {
-      if (sessionActive) {
-        document.cookie = `safeclick-session=active; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax;`;
-      } else {
-        document.cookie = "safeclick-session=; path=/; max-age=0; SameSite=Lax;";
-      }
+  /**
+   * Fetch profile from `profiles` table by user ID.
+   * Role is ALWAYS read from the database — never derived from email.
+   */
+  const fetchProfile = useCallback(async (userId: string): Promise<Profile | null> => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, email, full_name, role, created_at')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      console.error('[AuthProvider] Profile fetch error:', error.message);
+      return null;
     }
-  };
 
+    return data as Profile;
+  }, []);
+
+  const refreshProfile = useCallback(async () => {
+    if (!user) return;
+    const fetchedProfile = await fetchProfile(user.id);
+    setProfile(fetchedProfile);
+  }, [user, fetchProfile]);
+
+  // Initialize auth state from Supabase session (handles page refreshes)
   useEffect(() => {
-    const initAuth = async () => {
+    const initialize = async () => {
+      setIsLoading(true);
       try {
-        console.log('[AUTH CONTEXT] Initializing Auth state. isPlaceholder:', isPlaceholderSupabase());
-        if (isPlaceholderSupabase()) {
-          // Check local storage fallback for mock session
-          const stored = localStorage.getItem('safeclick_guardian_session');
-          console.log('[AUTH CONTEXT] Stored session retrieved:', stored ? 'FOUND' : 'NOT FOUND');
-          if (stored) {
-            const parsed = JSON.parse(stored);
-            console.log('[AUTH CONTEXT] Stored user loaded:', parsed.user.email);
-            setUser(parsed.user);
-            syncCookie(true);
-          } else {
-            setUser(null);
-            syncCookie(false);
-          }
-        } else {
-          // Real Supabase session check
-          console.log('[AUTH CONTEXT] Checking Supabase session...');
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session) {
-            console.log('[AUTH CONTEXT] Supabase session active:', session.user.email);
-            setUser(session.user);
-            syncCookie(true);
-          } else {
-            setUser(null);
-            syncCookie(false);
-          }
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+
+        if (currentSession?.user) {
+          const fetchedProfile = await fetchProfile(currentSession.user.id);
+          setProfile(fetchedProfile);
         }
-      } catch (e) {
-        console.error('Auth initialization error:', e);
+      } catch (err) {
+        console.error('[AuthProvider] Initialization error:', err);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
-    initAuth();
+    initialize();
 
-    // Listen for authentication changes from Supabase
-    if (!isPlaceholderSupabase()) {
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        if (session) {
-          setUser(session.user);
-          syncCookie(true);
+    // Listen for auth state changes (login, logout, token refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+
+        if (newSession?.user) {
+          const fetchedProfile = await fetchProfile(newSession.user.id);
+          setProfile(fetchedProfile);
         } else {
-          setUser(null);
-          syncCookie(false);
+          setProfile(null);
         }
-        setLoading(false);
+
+        setIsLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [fetchProfile]);
+
+  const signUp = async (email: string, password: string, fullName: string): Promise<void> => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+        },
+        // Supabase will send verification email to this address
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      throw mapAuthError(error);
+    }
+
+    // Insert profile row (role defaults to 'citizen' via Supabase DB default)
+    if (data.user) {
+      const { error: profileError } = await supabase.from('profiles').upsert({
+        id: data.user.id,
+        email,
+        full_name: fullName,
+        role: 'citizen',
       });
 
-      return () => {
-        subscription.unsubscribe();
-      };
-    }
-  }, []);
-
-  const signIn = async (data: LoginInput) => {
-    try {
-      setLoading(true);
-      console.log('[AUTH CONTEXT] signIn initiated. Email:', data.email);
-      if (isPlaceholderSupabase()) {
-        // Mock sign in fallback
-        const sessionData = await authService.signInWithPassword(data);
-        console.log('[AUTH CONTEXT] Mock auth success. User:', sessionData.user);
-        setUser(sessionData.user);
-        syncCookie(true);
-        console.log('[AUTH CONTEXT] Cookie synchronized. document.cookie:', typeof document !== 'undefined' ? document.cookie : 'N/A');
-      } else {
-        // Supabase sign in
-        console.log('[AUTH CONTEXT] Attempting Supabase Auth...');
-        const { data: res, error } = await supabase.auth.signInWithPassword({
-          email: data.email,
-          password: data.password,
-        });
-        if (error) throw error;
-        console.log('[AUTH CONTEXT] Supabase Auth success. User:', res.user);
-        setUser(res.user);
-        syncCookie(true);
+      if (profileError) {
+        console.error('[AuthProvider] Profile creation error:', profileError.message);
       }
-    } finally {
-      setLoading(false);
     }
   };
 
-  const signUp = async (data: SignupInput) => {
-    try {
-      setLoading(true);
-      if (isPlaceholderSupabase()) {
-        // Mock sign up fallback
-        await authService.signUp(data);
-      } else {
-        // Supabase sign up
-        const { error } = await supabase.auth.signUp({
-          email: data.email,
-          password: data.password,
-          options: {
-            data: {
-              fullName: data.fullName,
-            }
-          }
-        });
-        if (error) throw error;
-      }
-    } finally {
-      setLoading(false);
+  const signIn = async (email: string, password: string): Promise<void> => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      throw mapAuthError(error);
     }
   };
 
-  const signOut = async () => {
-    try {
-      setLoading(true);
-      if (isPlaceholderSupabase()) {
-        localStorage.removeItem('safeclick_guardian_session');
-      } else {
-        await supabase.auth.signOut();
-      }
-      setUser(null);
-      syncCookie(false);
-      toast.success('Successfully logged out from terminal session');
-    } catch (err: any) {
-      toast.error(err.message || 'Logout failed');
-    } finally {
-      setLoading(false);
+  const signOut = async (): Promise<void> => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setSession(null);
+    setProfile(null);
+    router.push('/login');
+  };
+
+  const resetPassword = async (email: string): Promise<void> => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/reset-password`,
+    });
+
+    if (error) {
+      throw mapAuthError(error);
     }
   };
+
+  const isEmailVerified = !!user?.email_confirmed_at;
+  const isAuthenticated = !!session && !!user;
+  const role = (profile?.role as UserRole) ?? null;
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        profile,
+        role,
+        isAuthenticated,
+        isLoading,
+        isEmailVerified,
+        signUp,
+        signIn,
+        signOut,
+        resetPassword,
+        refreshProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
 
-export function useAuth() {
+export function useAuthContext(): AuthContextType {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+  if (!context) {
+    throw new Error('useAuthContext must be used within an AuthProvider');
   }
   return context;
 }
+
+export const useAuth = useAuthContext;
+
+
+/**
+ * Maps Supabase AuthError codes to user-friendly messages.
+ */
+function mapAuthError(error: AuthError): Error {
+  const code = error.message?.toLowerCase() || '';
+
+  if (code.includes('invalid login credentials') || code.includes('invalid password')) {
+    return new Error('Incorrect email or password. Please try again.');
+  }
+  if (code.includes('email not confirmed')) {
+    return new Error('Your email is not verified yet. Please check your inbox and verify first.');
+  }
+  if (code.includes('user already registered')) {
+    return new Error('An account with this email already exists. Please log in instead.');
+  }
+  if (code.includes('password should be at least')) {
+    return new Error('Password must be at least 6 characters long.');
+  }
+  if (code.includes('rate limit')) {
+    return new Error('Too many attempts. Please wait a moment before trying again.');
+  }
+  if (code.includes('network') || code.includes('fetch')) {
+    return new Error('Network error. Please check your connection and try again.');
+  }
+  if (code.includes('expired') || code.includes('token')) {
+    return new Error('Your session has expired. Please log in again.');
+  }
+
+  return new Error(error.message || 'An unexpected error occurred. Please try again.');
+}
+

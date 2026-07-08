@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { FileText, Loader2, CheckCircle } from 'lucide-react';
+import { useComplaint } from '@/hooks/useComplaint';
 import { toast } from 'sonner';
 
 interface QuickFormData {
@@ -26,22 +27,35 @@ export default function EmergencyQuickForm() {
   const [submitted, setSubmitted] = useState(false);
   const [complaintId, setComplaintId] = useState('');
 
+  const { submit, isLoading: isSubmitting } = useComplaint();
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<QuickFormData>();
 
   const onSubmit = async (data: QuickFormData) => {
-    // TODO: Replace with POST /api/complaints/emergency — backend integration point
-    await new Promise((r) => setTimeout(r, 1800));
-    const id = `EMP-${Date.now().toString().slice(-6)}`;
-    setComplaintId(id);
-    setSubmitted(true);
-    toast.success(`Emergency complaint filed — ID: ${id}`, {
-      description: 'Forwarded to Cyber Police. You will receive a call within 30 minutes.',
-      duration: 6000,
+    const result = await submit({
+      category: data.incidentType,
+      incidentDate: new Date().toISOString(),
+      platform: 'Other',
+      lossAmount: parseFloat(data.amountLost),
+      transactionId: data.transactionId,
+      victimDetails: {
+        name: 'Quick Reporter',
+        phone: 'Not provided',
+      },
+      narrative: data.description,
     });
+
+    if (result) {
+      setComplaintId(result._id);
+      setSubmitted(true);
+      toast.success(`Emergency complaint filed — ID: ${result._id}`, {
+        description: 'Forwarded to Cyber Police. You will receive a call within 30 minutes.',
+        duration: 6000,
+      });
+    }
   };
 
   if (submitted) {

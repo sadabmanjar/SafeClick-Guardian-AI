@@ -3,10 +3,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  Mail, Lock, Eye, EyeOff, ShieldAlert,
-  ArrowRight, Loader2, User, Check,
-} from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ShieldAlert, ArrowRight, Loader2, User, Check, AlertCircle, MailCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -20,6 +17,9 @@ export default function SignupForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [signupComplete, setSignupComplete] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
 
   const {
     register,
@@ -43,30 +43,54 @@ export default function SignupForm() {
 
   const onSubmit = async (data: SignupInput) => {
     setIsLoading(true);
+    setAuthError(null);
     try {
-      await signUp(data);
-      toast.success('Registration accepted! Sending OTP code.');
-      router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`);
-    } catch (err: any) {
-      toast.error(err.message || 'Account registration failed.');
+      await signUp(data.email, data.password, data.fullName);
+      setRegisteredEmail(data.email);
+      setSignupComplete(true);
+      toast.success('Account created! Check your inbox to verify your email.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Account registration failed.';
+      setAuthError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const inputClass = (hasError: boolean) =>
-    `w-full h-11 pl-10 pr-4 rounded-xl bg-white/[0.04] border ${
-      hasError
-        ? 'border-red-500/50 focus:border-red-400 focus:ring-red-500/10'
-        : 'border-white/[0.08] focus:border-cyan-500/50 focus:ring-cyan-500/10'
-    } text-sm focus:outline-none focus:ring-2 transition-all placeholder:text-white/15 font-medium text-white`;
 
-  const ErrorMsg = ({ msg }: { msg?: string }) =>
-    msg ? (
-      <p className="text-[11px] text-red-400 flex items-center gap-1.5 mt-1">
-        <ShieldAlert size={11} /> {msg}
-      </p>
-    ) : null;
+  // Success state: show email verification prompt
+  if (signupComplete) {
+    return (
+      <div className="w-full max-w-md p-8 rounded-2xl border border-primary/20 bg-zinc-950/80 backdrop-blur-xl shadow-[0_0_50px_rgba(0,102,255,0.15)] space-y-6 text-center">
+        <div className="mx-auto w-14 h-14 rounded-xl bg-success/10 border border-success/20 flex items-center justify-center text-success">
+          <MailCheck size={26} />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-xl font-extrabold tracking-tight bg-gradient-to-b from-white via-zinc-200 to-zinc-500 bg-clip-text text-transparent">
+            Verify Your Email
+          </h2>
+          <p className="text-xs text-muted-foreground leading-relaxed px-2">
+            A verification link has been sent to{' '}
+            <span className="text-foreground font-semibold">{registeredEmail}</span>.
+            Click the link in your email to activate your account.
+          </p>
+        </div>
+        <div className="p-3 rounded-xl bg-zinc-900 border border-border text-xs text-muted-foreground space-y-1">
+          <p className="font-semibold text-foreground">Next Steps:</p>
+          <p>1. Open the email from Supabase / SafeClick</p>
+          <p>2. Click the <span className="text-primary font-semibold">Confirm Email</span> link</p>
+          <p>3. You will be redirected to the dashboard</p>
+        </div>
+        <Link
+          href="/login"
+          className="inline-flex items-center gap-1.5 text-xs text-primary font-bold hover:underline"
+        >
+          Back to Login <ArrowRight size={12} />
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-6">
@@ -80,7 +104,15 @@ export default function SignupForm() {
         <p className="text-xs text-white/30 font-medium">Provision your credentials to access SafeClick</p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
+      {authError && (
+        <div className="flex items-start gap-2.5 p-3 rounded-xl bg-danger/10 border border-danger/30 text-danger text-xs">
+          <AlertCircle size={14} className="mt-0.5 shrink-0" />
+          <span>{authError}</span>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-left">
         {/* Full Name */}
         <div className="space-y-1.5">
           <label htmlFor="fullName" className="block text-xs font-bold text-white/50 uppercase tracking-wider">
@@ -121,8 +153,9 @@ export default function SignupForm() {
 
         {/* Password */}
         <div className="space-y-1.5">
-          <label htmlFor="password" className="block text-xs font-bold text-white/50 uppercase tracking-wider">
-            Password
+
+          <label htmlFor="password" className="block text-xs font-semibold text-foreground">
+            Passkey Crypt (8+ characters)
           </label>
           <div className="relative">
             <Lock size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25" />
@@ -143,6 +176,7 @@ export default function SignupForm() {
               {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
             </button>
           </div>
+
 
           {/* Password requirements */}
           <div className="flex flex-wrap gap-1.5 pt-1">
@@ -189,7 +223,8 @@ export default function SignupForm() {
           <ErrorMsg msg={errors.confirmPassword?.message} />
         </div>
 
-        {/* Terms checkbox */}
+
+        {/* Terms */}
         <div className="space-y-1">
           <div className="flex items-start gap-2.5">
             <input
@@ -206,7 +241,6 @@ export default function SignupForm() {
           <ErrorMsg msg={errors.acceptTerms?.message} />
         </div>
 
-        {/* Submit */}
         <Button
           type="submit"
           className="w-full h-11 font-bold rounded-xl flex items-center justify-center gap-2 transition-all border-0 text-white text-sm"
@@ -219,7 +253,9 @@ export default function SignupForm() {
           {isLoading ? (
             <><Loader2 size={16} className="animate-spin" /> Creating Account...</>
           ) : (
-            <>Create Account <ArrowRight size={16} /></>
+            <>
+              Register Identity &amp; Send OTP <ArrowRight size={16} />
+            </>
           )}
         </Button>
       </form>
@@ -241,3 +277,20 @@ export default function SignupForm() {
     </div>
   );
 }
+
+const inputClass = (hasError: boolean) =>
+  `w-full h-12 pl-10 pr-4 rounded-xl bg-white/[0.04] border ${
+    hasError
+      ? 'border-red-500/50 focus:border-red-400 focus:ring-red-500/10'
+      : 'border-white/8 focus:border-cyan-500/50 focus:ring-cyan-500/10'
+  } text-sm focus:outline-none focus:ring-2 transition-all placeholder:text-white/15 font-medium text-white`;
+
+const ErrorMsg = ({ msg }: { msg?: string }) => {
+  if (!msg) return null;
+  return (
+    <p className="text-[11px] text-red-400 flex items-center gap-1.5 mt-1">
+      <ShieldAlert size={11} /> {msg}
+    </p>
+  );
+};
+

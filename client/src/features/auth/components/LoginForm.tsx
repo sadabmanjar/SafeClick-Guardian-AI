@@ -3,11 +3,8 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  Mail, Lock, Eye, EyeOff, ShieldAlert,
-  ArrowRight, Loader2, Shield, Fingerprint, Cpu,
-} from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Mail, Lock, Eye, EyeOff, ShieldAlert, ArrowRight, Loader2, AlertCircle, Shield, Fingerprint, Cpu } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { loginSchema, LoginInput } from '../schemas/auth.schema';
@@ -16,9 +13,14 @@ import { Button } from '@/components/ui/button';
 
 export default function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { signIn } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  // Show auth errors passed via URL query param (e.g., expired session)
+  const urlError = searchParams.get('error');
 
   const {
     register,
@@ -31,13 +33,19 @@ export default function LoginForm() {
 
   const onSubmit = async (data: LoginInput) => {
     setIsLoading(true);
+    setAuthError(null);
     try {
-      await signIn(data);
-      toast.success('Successfully logged in!');
-      router.push('/dashboard');
-    } catch (err: any) {
-      console.error('[LOGIN ERROR] Auth failed:', err);
-      toast.error(err.message || 'Authentication failed. Please check your credentials.');
+
+      await signIn(data.email, data.password);
+      toast.success('Logged in successfully!');
+      const redirectTo = searchParams.get('redirectTo') || '/analyze';
+      router.push(redirectTo);
+      router.refresh();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Authentication failed.';
+      setAuthError(message);
+      toast.error(message);
+
     } finally {
       setIsLoading(false);
     }
@@ -55,8 +63,31 @@ export default function LoginForm() {
         <p className="text-xs text-white/30 font-medium">Sign in to access the guardian console</p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        {/* Email */}
+      {/* URL-based error (e.g., session expired, auth callback failed) */}
+      {urlError && (
+        <div className="flex items-start gap-2.5 p-3 rounded-xl bg-danger/10 border border-danger/30 text-danger text-xs">
+          <AlertCircle size={14} className="mt-0.5 shrink-0" />
+          <span>
+            {urlError === 'auth_callback_failed'
+              ? 'Email verification failed. Please try again.'
+              : urlError === 'missing_code'
+              ? 'Invalid verification link. Please request a new one.'
+              : 'Session expired. Please log in again.'}
+          </span>
+        </div>
+      )}
+
+      {/* Inline auth error */}
+      {authError && (
+        <div className="flex items-start gap-2.5 p-3 rounded-xl bg-danger/10 border border-danger/30 text-danger text-xs">
+          <AlertCircle size={14} className="mt-0.5 shrink-0" />
+          <span>{authError}</span>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-left">
+        {/* Email Field */}
+
         <div className="space-y-1.5">
           <label htmlFor="email" className="block text-xs font-bold text-white/50 uppercase tracking-wider">
             Security Email
@@ -127,7 +158,9 @@ export default function LoginForm() {
         </div>
 
         {/* Remember Me */}
-        <div className="flex items-center gap-2.5">
+
+        <div className="flex items-center gap-2">
+
           <input
             id="rememberMe"
             type="checkbox"
@@ -140,7 +173,7 @@ export default function LoginForm() {
           </label>
         </div>
 
-        {/* Submit */}
+
         <Button
           type="submit"
           className="w-full h-12 font-bold rounded-xl flex items-center justify-center gap-2 transition-all border-0 text-white text-sm"
@@ -153,10 +186,14 @@ export default function LoginForm() {
           {isLoading ? (
             <><Loader2 size={16} className="animate-spin" /> Authorizing...</>
           ) : (
-            <>Authorize Access <ArrowRight size={16} /></>
+
+            <>
+              Decrypt Key &amp; Login <ArrowRight size={16} />
+            </>
           )}
         </Button>
       </form>
+
 
       {/* Divider */}
       <div className="flex items-center gap-3">

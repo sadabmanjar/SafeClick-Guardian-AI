@@ -1,6 +1,8 @@
 'use client';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useComplaint } from '@/hooks/useComplaint';
+import { CreateComplaintRequest } from '@/types/common';
 import {
   Calendar,
   CreditCard,
@@ -58,8 +60,8 @@ const stepColors: Record<string, { ring: string; bg: string; text: string; activ
 
 export default function ComplaintWizard() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [generatedComplaint, setGeneratedComplaint] = useState<string | null>(null);
+  const { submit, isLoading: isGenerating } = useComplaint();
 
   const form = useForm<ComplaintFormData>({
     defaultValues: {
@@ -88,10 +90,34 @@ export default function ComplaintWizard() {
       if (!valid) return;
     }
     if (currentStep === 3) {
-      setIsGenerating(true);
-      await new Promise((r) => setTimeout(r, 2000));
-      setGeneratedComplaint(buildComplaintText(watchedValues));
-      setIsGenerating(false);
+      const payload: CreateComplaintRequest = {
+        category: watchedValues.fraudType || 'Financial Fraud',
+        incidentDate: watchedValues.incidentDate || new Date().toISOString(),
+        platform: watchedValues.platform || 'Other',
+        lossAmount: watchedValues.amountLost ? parseFloat(watchedValues.amountLost) : 0,
+        transactionId: watchedValues.transactionId,
+        bankName: watchedValues.bankName,
+        victimDetails: {
+          name: watchedValues.complainantName || 'Anonymous',
+          phone: watchedValues.complainantPhone || '0000000000',
+          email: watchedValues.complainantEmail,
+          address: watchedValues.complainantAddress,
+        },
+        suspectDetails: {
+          phone: watchedValues.suspectPhone,
+          email: watchedValues.suspectEmail,
+          bankAccount: watchedValues.suspectAccountNo,
+          upiId: watchedValues.upiId,
+        },
+        narrative: watchedValues.description || 'No description provided.',
+      };
+
+      const result = await submit(payload);
+      if (result) {
+        setGeneratedComplaint(buildComplaintText(watchedValues));
+      } else {
+        return; // Stop if failed
+      }
     }
     setCurrentStep((prev) => Math.min(prev + 1, 4));
   };

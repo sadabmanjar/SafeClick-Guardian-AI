@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Mail, ShieldAlert, ArrowRight, Loader2, KeyRound } from 'lucide-react';
+import { Mail, ShieldAlert, ArrowRight, Loader2, KeyRound, AlertCircle, MailCheck } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { forgotPasswordSchema, ForgotPasswordInput } from '../schemas/auth.schema';
@@ -13,6 +13,8 @@ import { Button } from '@/components/ui/button';
 export default function ForgotPasswordForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [sentToEmail, setSentToEmail] = useState('');
 
   const {
     register,
@@ -20,19 +22,21 @@ export default function ForgotPasswordForm() {
     formState: { errors },
   } = useForm<ForgotPasswordInput>({
     resolver: zodResolver(forgotPasswordSchema),
-    defaultValues: {
-      email: '',
-    },
+    defaultValues: { email: '' },
   });
 
   const onSubmit = async (data: ForgotPasswordInput) => {
     setIsLoading(true);
+    setAuthError(null);
     try {
       await authService.resetPasswordForEmail(data);
-      toast.success('Passkey recovery token dispatched!');
+      setSentToEmail(data.email);
       setIsSent(true);
-    } catch (err: any) {
-      toast.error(err.message || 'Passkey recovery request failed.');
+      toast.success('Password reset link dispatched!');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Reset request failed.';
+      setAuthError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -53,11 +57,23 @@ export default function ForgotPasswordForm() {
       </div>
 
       {isSent ? (
-        <div className="p-4 bg-success/15 border border-success/35 text-success rounded-xl text-center text-xs space-y-4">
-          <p>
-            An authorized recovery link has been dispatched to your email address. Follow the instructions to override keys.
-          </p>
-          <div className="pt-2">
+        <div className="space-y-4">
+          <div className="p-4 bg-success/15 border border-success/35 text-success rounded-xl text-center space-y-3">
+            <MailCheck className="mx-auto" size={26} />
+            <p className="text-sm font-semibold">Reset link dispatched!</p>
+            <p className="text-xs text-success/80 leading-relaxed">
+              A password reset link has been sent to{' '}
+              <span className="font-bold">{sentToEmail}</span>.
+              The link is valid for 60 minutes.
+            </p>
+          </div>
+          <div className="p-3 rounded-xl bg-zinc-900 border border-border text-xs text-muted-foreground space-y-1">
+            <p className="font-semibold text-foreground">Next Steps:</p>
+            <p>1. Open the email from SafeClick</p>
+            <p>2. Click <span className="text-primary font-semibold">Reset Password</span></p>
+            <p>3. Set a new strong password</p>
+          </div>
+          <div className="text-center">
             <Link
               href="/login"
               className="inline-flex items-center gap-1 text-xs text-primary font-bold hover:underline"
@@ -67,57 +83,62 @@ export default function ForgotPasswordForm() {
           </div>
         </div>
       ) : (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-left">
-          {/* Email */}
-          <div className="space-y-1.5">
-            <label htmlFor="email" className="block text-xs font-semibold text-foreground">
-              Contact Email
-            </label>
-            <div className="relative">
-              <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input
-                id="email"
-                type="email"
-                placeholder="e.g. agent@safeclick.gov"
-                className={`w-full h-11 pl-10 pr-4 rounded-xl bg-black border ${
-                  errors.email ? 'border-danger focus:ring-danger/25' : 'border-border focus:border-primary/50'
-                } text-sm focus:outline-none focus:ring-2 focus:ring-primary/25 transition-all placeholder:text-zinc-600`}
-                {...register('email')}
-                disabled={isLoading}
-              />
+        <>
+          {authError && (
+            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-danger/10 border border-danger/30 text-danger text-xs">
+              <AlertCircle size={14} className="mt-0.5 shrink-0" />
+              <span>{authError}</span>
             </div>
-            {errors.email && (
-              <p className="text-[11px] text-danger flex items-center gap-1.5 mt-1 font-mono">
-                <ShieldAlert size={12} /> {errors.email.message}
-              </p>
-            )}
+          )}
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-left">
+            <div className="space-y-1.5">
+              <label htmlFor="email" className="block text-xs font-semibold text-foreground">
+                Contact Email
+              </label>
+              <div className="relative">
+                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="e.g. agent@safeclick.gov"
+                  className={`w-full h-11 pl-10 pr-4 rounded-xl bg-black border ${
+                    errors.email ? 'border-danger focus:ring-danger/25' : 'border-border focus:border-primary/50'
+                  } text-sm focus:outline-none focus:ring-2 focus:ring-primary/25 transition-all placeholder:text-zinc-600`}
+                  {...register('email')}
+                  disabled={isLoading}
+                />
+              </div>
+              {errors.email && (
+                <p className="text-[11px] text-danger flex items-center gap-1.5 mt-1 font-mono">
+                  <ShieldAlert size={12} /> {errors.email.message}
+                </p>
+              )}
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full h-11 bg-primary text-primary-foreground font-bold shadow-[0_0_15px_rgba(0,102,255,0.4)] rounded-xl flex items-center justify-center gap-2 hover:bg-primary/90 transition-all pt-0 pb-0"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" /> Dispatching...
+                </>
+              ) : (
+                <>
+                  Send Decryption Recovery <ArrowRight size={16} />
+                </>
+              )}
+            </Button>
+          </form>
+
+          <div className="text-center pt-2">
+            <Link href="/login" className="text-xs font-semibold text-primary hover:underline transition-colors">
+              Back to login portal
+            </Link>
           </div>
-
-          {/* Submit */}
-          <Button
-            type="submit"
-            className="w-full h-11 bg-primary text-primary-foreground font-bold shadow-[0_0_15px_rgba(0,102,255,0.4)] rounded-xl flex items-center justify-center gap-2 hover:bg-primary/90 transition-all pt-0 pb-0"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 size={16} className="animate-spin" /> Dispatching...
-              </>
-            ) : (
-              <>
-                Send Decryption Recovery <ArrowRight size={16} />
-              </>
-            )}
-          </Button>
-        </form>
-      )}
-
-      {!isSent && (
-        <div className="text-center pt-2">
-          <Link href="/login" className="text-xs font-semibold text-primary hover:underline transition-colors">
-            Back to login portal
-          </Link>
-        </div>
+        </>
       )}
     </div>
   );

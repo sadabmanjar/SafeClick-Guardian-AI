@@ -128,7 +128,6 @@ export default function EvidenceDetailModal({ item, onClose }: EvidenceDetailMod
               toast.success('Evidence packet downloaded!');
               onClose();
             }}
-            className="flex-1 h-11 bg-blue-600 hover:bg-blue-750 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all pt-0 pb-0 shadow-sm"
             className="flex-1 h-11 bg-blue-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-blue-700 transition-all pt-0 pb-0 shadow-sm"
           >
             <Download size={15} /> Download Packet

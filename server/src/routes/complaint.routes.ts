@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createComplaint, getComplaints, getComplaintById } from '../controllers/complaint.controller';
+import { createComplaint, generateComplaint, getComplaints, getComplaintById } from '../controllers/complaint.controller';
 import { authenticateJWT } from '../middlewares/auth.middleware';
 import { validateBody } from '../middlewares/validate.middleware';
 import { createComplaintSchema } from '../validators/schema';

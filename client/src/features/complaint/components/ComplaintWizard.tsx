@@ -61,7 +61,8 @@ const stepColors: Record<string, { ring: string; bg: string; text: string; activ
 export default function ComplaintWizard() {
   const [currentStep, setCurrentStep] = useState(1);
   const [generatedComplaint, setGeneratedComplaint] = useState<string | null>(null);
-  const { submit, isLoading: isGenerating } = useComplaint();
+  const [isGenerating, setIsGenerating] = useState(false);
+  const { submit, isLoading: isSubmitting } = useComplaint();
 
   const form = useForm<ComplaintFormData>({
     defaultValues: {
@@ -113,7 +114,7 @@ export default function ComplaintWizard() {
       } finally {
         setIsGenerating(false);
       }
-    }
+
       const payload: CreateComplaintRequest = {
         category: watchedValues.fraudType || 'Financial Fraud',
         incidentDate: watchedValues.incidentDate || new Date().toISOString(),
@@ -137,9 +138,7 @@ export default function ComplaintWizard() {
       };
 
       const result = await submit(payload);
-      if (result) {
-        setGeneratedComplaint(buildComplaintText(watchedValues));
-      } else {
+      if (!result) {
         return; // Stop if failed
       }
     }

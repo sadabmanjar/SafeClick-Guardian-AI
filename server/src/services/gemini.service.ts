@@ -198,8 +198,6 @@ Phone: ${data.contactNumber || '[Phone]'}
 Email: ${data.emailAddress || '[Email]'}`;
 };
 
-const simulateAnalysis = (content: string, contentType: 'text' | 'url' | 'image'): GeminiAnalysisResult => {
-  const lower = content.toLowerCase();
 const simulatePremiumAnalysis = (context: StructuredContext): PremiumGeminiResult => {
   const isScam = context.calculatedLocalRiskScore > 15 || context.detectedKeywords.length > 0;
   

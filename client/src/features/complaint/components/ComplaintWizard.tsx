@@ -90,6 +90,30 @@ export default function ComplaintWizard() {
       if (!valid) return;
     }
     if (currentStep === 3) {
+      setIsGenerating(true);
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        const token = localStorage.getItem('token');
+        
+        const res = await fetch(`${apiUrl}/complaints/generate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify(watchedValues)
+        });
+
+        if (!res.ok) throw new Error('Generation failed');
+        const data = await res.json();
+        setGeneratedComplaint(data.data.complaintText);
+      } catch (e) {
+        console.error('API Error, falling back to mock text:', e);
+        setGeneratedComplaint(buildComplaintText(watchedValues));
+      } finally {
+        setIsGenerating(false);
+      }
+    }
       const payload: CreateComplaintRequest = {
         category: watchedValues.fraudType || 'Financial Fraud',
         incidentDate: watchedValues.incidentDate || new Date().toISOString(),

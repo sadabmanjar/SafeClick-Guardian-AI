@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Users, Bell, Plus, CheckCircle, Phone } from 'lucide-react';
 import { useEmergency } from '@/hooks/useEmergency';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 const contacts = [
   {
@@ -74,6 +75,13 @@ export default function TrustedContactsPanel() {
           <Users size={16} className="text-blue-600" />
           <h3 className="text-sm font-bold text-gray-900">Trusted Contacts</h3>
         </div>
+        <Link
+          href="/settings"
+          className="p-1.5 rounded-lg hover:bg-muted transition-colors"
+          title="Add trusted contact"
+        >
+          <Plus size={14} className="text-muted-foreground hover:text-primary transition-colors" />
+        </Link>
         <button
           onClick={() => toast.info('Add trusted contact — connect to user profile settings')}
           className="p-1.5 rounded-lg hover:bg-gray-150 transition-colors"

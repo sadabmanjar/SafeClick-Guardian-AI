@@ -10,6 +10,8 @@ const router = Router();
 router.use(authenticateJWT);
 
 router.post('/', validateBody(createComplaintSchema), createComplaint);
+router.post('/generate', generateComplaint);
+router.get('/', getComplaints);
 router.get('/history', getComplaints);
 router.get('/:id', getComplaintById);
 

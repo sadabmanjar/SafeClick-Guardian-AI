@@ -64,6 +64,8 @@ export default function EmergencyStationCard() {
             {nearest.phone}
           </a>
           <button
+            onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(nearest.name + ' ' + nearest.address)}`, '_blank')}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary/15 border border-primary/30 text-xs font-bold text-primary hover:bg-primary/25 transition-colors"
             onClick={() => toast.info('Navigation — connect to Leaflet/OpenStreetMap integration')}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-xs font-bold text-blue-600 hover:bg-blue-100 transition-colors"
           >

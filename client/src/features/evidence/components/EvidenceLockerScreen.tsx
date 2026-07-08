@@ -43,13 +43,13 @@ export default function EvidenceLockerScreen() {
   const [activeFilter, setActiveFilter] = useState<'all' | 'image' | 'video' | 'audio' | 'pdf'>('all');
   const [previewItem, setPreviewItem] = useState<EvidenceItem | null>(null);
 
-  const handleUploadSuccess = (file: { name: string; type: 'image' | 'video' | 'audio' | 'pdf'; size: string; ocrText?: string }) => {
+  const handleUploadSuccess = (file: { name: string; type: 'image' | 'video' | 'audio' | 'pdf'; size: string; hash: string; ocrText?: string }) => {
     const newItem: EvidenceItem = {
       id: `ev-${Math.random().toString(36).substr(2, 9)}`,
       name: file.name,
       type: file.type,
       size: file.size,
-      hash: Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join(''),
+      hash: file.hash,
       date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
       ocrText: file.ocrText,
     };

@@ -45,7 +45,7 @@ export const createComplaintSchema = z.object({
   victimDetails: z.object({
     name: z.string().min(1, 'Victim name is required'),
     phone: z.string().min(5, 'Victim contact number is required'),
-    email: z.string().email().optional().or(z.literal('')),
+    email: z.preprocess((val) => (val === '' || val === null || (typeof val === 'string' && val.trim() === '') ? undefined : val), z.string().optional()),
     address: z.string().optional(),
   }),
   suspectDetails: z.object({

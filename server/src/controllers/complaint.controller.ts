@@ -10,6 +10,7 @@ export const createComplaint = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
+  console.log('[DEBUG] createComplaint hit');
   try {
     const userId = req.user?.userId;
     const complaintData = {
@@ -20,7 +21,13 @@ export const createComplaint = async (
     const newComplaint = await submitComplaint(complaintData);
     sendSuccess(res, 201, 'Complaint submitted successfully', newComplaint);
   } catch (error) {
-    next(error);
+    console.error('[DEBUG] createComplaint error:', error);
+    if (typeof next === 'function') {
+      next(error);
+    } else {
+      console.error('[DEBUG] next is not a function in createComplaint!');
+      res.status(500).json({ success: false, message: 'next is not a function', error: (error as Error)?.message });
+    }
   }
 };
 

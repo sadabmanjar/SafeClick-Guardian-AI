@@ -70,14 +70,13 @@ const ComplaintSchema: Schema = new Schema({
   timestamps: true,
 });
 
-ComplaintSchema.pre('validate', function (this: any, next: any) {
+ComplaintSchema.pre('validate', function (this: any) {
   if (!this.complaintId) {
     // format: CMP-YYYY-XXXXXX
     const year = new Date().getFullYear();
     const random = Math.floor(100000 + Math.random() * 900000);
     this.complaintId = `CMP-${year}-${random}`;
   }
-  next();
 });
 
 export default mongoose.model<IComplaint>('Complaint', ComplaintSchema);

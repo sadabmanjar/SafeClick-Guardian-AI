@@ -33,6 +33,15 @@ export const authenticateJWT = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
+  // TEMPORARILY DISABLED: Allow access without login
+  req.user = {
+    userId: 'mock-user-id-12345',
+    email: 'citizen@example.com',
+    role: 'citizen',
+  };
+  return next();
+
+  /*
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -46,7 +55,6 @@ export const authenticateJWT = async (
   const token = authHeader.split(' ')[1];
 
   try {
-    // Verify token against Supabase — this validates signature + expiry
     const { data, error } = await supabaseAdmin.auth.getUser(token);
 
     if (error || !data.user) {
@@ -59,7 +67,6 @@ export const authenticateJWT = async (
 
     const supabaseUser = data.user;
 
-    // Read the role from the profiles table (never from email string)
     const { data: profile } = await supabaseAdmin
       .from('profiles')
       .select('role')
@@ -79,6 +86,7 @@ export const authenticateJWT = async (
       message: 'Token verification failed. Please log in again.',
     });
   }
+  */
 };
 
 /**

@@ -3,9 +3,30 @@ import type { NextRequest } from 'next/server';
 
 export function proxy(request: NextRequest) {
   const session = request.cookies.get('safeclick-session')?.value;
+  const role = request.cookies.get('safeclick-role')?.value;
   const { pathname } = request.nextUrl;
 
-  console.log(`[PROXY CHECK] Path: ${pathname} | Session Cookie: ${session || 'NOT FOUND'}`);
+  console.log(`[PROXY CHECK] Path: ${pathname} | Session Cookie: ${session || 'NOT FOUND'} | Role: ${role || 'NOT FOUND'}`);
+
+  // Admin routes protection
+  if (pathname.startsWith('/admin')) {
+    if (pathname === '/admin/login') {
+      if (session && (role === 'admin' || role === 'super_admin')) {
+        return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+      }
+      return NextResponse.next();
+    }
+
+    if (!session || (role !== 'admin' && role !== 'super_admin')) {
+      const adminLoginUrl = new URL('/admin/login', request.url);
+      return NextResponse.redirect(adminLoginUrl);
+    }
+    
+    // Redirect /admin to /admin/dashboard for authorized admins
+    if (pathname === '/admin') {
+      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+    }
+  }
 
   // Paths that require authentication
   const protectedPaths = [
@@ -34,8 +55,9 @@ export function proxy(request: NextRequest) {
 
   // Redirect unauthenticated requests to login
   if (isProtected && !session) {
-    const loginUrl = new URL('/login', request.url);
-    return NextResponse.redirect(loginUrl);
+    // TEMPORARILY DISABLED: Allow access without login
+    // const loginUrl = new URL('/login', request.url);
+    // return NextResponse.redirect(loginUrl);
   }
 
   // Redirect authenticated requests away from login/signup/otp to dashboard
@@ -47,9 +69,13 @@ export function proxy(request: NextRequest) {
   // Redirect root path depending on active session state
   if (pathname === '/') {
     if (session) {
+      if (role === 'admin' || role === 'super_admin') {
+         return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+      }
       return NextResponse.redirect(new URL('/dashboard', request.url));
     } else {
-      return NextResponse.redirect(new URL('/login', request.url));
+      // TEMPORARILY DISABLED: Allow access without login
+      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
   }
 

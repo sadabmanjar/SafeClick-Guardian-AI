@@ -11,10 +11,13 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   useEffect(() => {
     console.log('[PROTECTED ROUTE GUARD] User:', user ? user.email : 'NONE', '| Loading:', isLoading);
+    // TEMPORARILY DISABLED: Allow access without login
+    /*
     if (!isLoading && !user) {
       console.log('[PROTECTED ROUTE GUARD] Unauthorized! Redirecting to /login...');
       router.push('/login');
     }
+    */
   }, [user, isLoading, router]);
 
   if (isLoading) {
@@ -28,9 +31,12 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     );
   }
 
+  // TEMPORARILY DISABLED: Allow rendering without user
+  /*
   if (!user) {
     return null;
   }
+  */
 
   return <>{children}</>;
 }

@@ -10,9 +10,13 @@ export interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   role: UserRole | null;
+  permissions: string[];
   isAuthenticated: boolean;
   isLoading: boolean;
   isEmailVerified: boolean;
+  isAdmin: () => boolean;
+  isCitizen: () => boolean;
+  isSuperAdmin: () => boolean;
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -38,11 +42,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .from('profiles')
       .select('id, email, full_name, role, created_at')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error('[AuthProvider] Profile fetch error:', error.message);
       return null;
+    }
+
+    if (!data) {
+      console.warn('[AuthProvider] No profile row found for this user in the database.');
+      return null;
+    }
+
+    // Set role cookie for middleware
+    if (typeof window !== 'undefined') {
+      const maxAge = 60 * 60 * 24 * 7; // 1 week
+      document.cookie = `safeclick-role=${data.role}; path=/; max-age=${maxAge}; SameSite=Lax`;
     }
 
     return data as Profile;
@@ -65,8 +80,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(currentSession?.user ?? null);
 
         if (currentSession?.user) {
+          if (typeof window !== 'undefined' && currentSession.access_token) {
+            const maxAge = 60 * 60 * 24 * 7;
+            document.cookie = `safeclick-session=${currentSession.access_token}; path=/; max-age=${maxAge}; SameSite=Lax`;
+          }
           const fetchedProfile = await fetchProfile(currentSession.user.id);
           setProfile(fetchedProfile);
+        } else if (typeof window !== 'undefined') {
+          // Clear cookies if no user
+          document.cookie = `safeclick-session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+          document.cookie = `safeclick-role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
         }
       } catch (err) {
         console.error('[AuthProvider] Initialization error:', err);
@@ -82,6 +105,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       async (event: any, newSession: any) => {
         setSession(newSession);
         setUser(newSession?.user ?? null);
+
+        if (typeof window !== 'undefined') {
+          if (newSession?.access_token) {
+            const maxAge = 60 * 60 * 24 * 7; // 1 week
+            document.cookie = `safeclick-session=${newSession.access_token}; path=/; max-age=${maxAge}; SameSite=Lax`;
+          } else {
+            document.cookie = `safeclick-session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+            document.cookie = `safeclick-role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+          }
+        }
 
         if (newSession?.user) {
           const fetchedProfile = await fetchProfile(newSession.user.id);
@@ -142,6 +175,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setSession(null);
     setProfile(null);
+    
+    if (typeof window !== 'undefined') {
+      document.cookie = `safeclick-session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+      document.cookie = `safeclick-role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+    }
+    
     router.push('/login');
   };
 
@@ -159,6 +198,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAuthenticated = !!session && !!user;
   const role = (profile?.role as UserRole) ?? null;
 
+  const permissions = role === 'super_admin' ? ['*'] : role === 'admin' ? ['manage_users', 'view_reports'] : [];
+  
+  const isAdmin = useCallback(() => role === 'admin' || role === 'super_admin', [role]);
+  const isCitizen = useCallback(() => role === 'citizen' || role === null, [role]);
+  const isSuperAdmin = useCallback(() => role === 'super_admin', [role]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -166,9 +211,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         session,
         profile,
         role,
+        permissions,
         isAuthenticated,
         isLoading,
         isEmailVerified,
+        isAdmin,
+        isCitizen,
+        isSuperAdmin,
         signUp,
         signIn,
         signOut,

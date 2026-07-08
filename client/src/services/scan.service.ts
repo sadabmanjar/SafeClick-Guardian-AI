@@ -8,7 +8,7 @@ import apiClient from '@/lib/api';
 import { ApiSuccess, ApiError } from '@/types/api';
 import { ScanResult, ScanRequest } from '@/types/common';
 
-const ENDPOINT = '/api/scans';
+const ENDPOINT = '/scans';
 
 export const scanService = {
   /**

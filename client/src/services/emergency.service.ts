@@ -8,7 +8,7 @@ import apiClient from '@/lib/api';
 import { ApiSuccess } from '@/types/api';
 import { EmergencyAlert, TriggerAlertRequest } from '@/types/common';
 
-const ENDPOINT = '/api/emergency';
+const ENDPOINT = '/emergency';
 
 export const emergencyService = {
   /**

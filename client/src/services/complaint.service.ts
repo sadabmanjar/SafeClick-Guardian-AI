@@ -7,7 +7,7 @@ import apiClient from '@/lib/api';
 import { ApiSuccess } from '@/types/api';
 import { Complaint, CreateComplaintRequest } from '@/types/common';
 
-const ENDPOINT = '/api/complaints';
+const ENDPOINT = '/complaints';
 
 export const complaintService = {
   /**

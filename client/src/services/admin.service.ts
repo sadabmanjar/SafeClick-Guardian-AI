@@ -9,7 +9,7 @@ import apiClient from '@/lib/api';
 import { ApiSuccess } from '@/types/api';
 import { AdminStats, ScanResult, Complaint, EmergencyAlert } from '@/types/common';
 
-const ADMIN = '/api/admin';
+const ADMIN = '/admin';
 
 export const adminService = {
   /**
